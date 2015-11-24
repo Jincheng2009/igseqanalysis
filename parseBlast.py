@@ -10,16 +10,22 @@ def analyzeMutation(qstart, qseq, refstart, refseq, fastaid, ref, strandforward)
     if len(qseq) != len(refseq):
         sys.stderr.write("Error :" + fastaid + " does not have same length as reference " + ref)
     mutations =[]
+    querygap = 0
+    refgap=0
     for i in range(0,len(qseq)-1):
         details = []
+        if refseq[i] == '-':
+            refgap += 1
+        if qseq[i] == '-':
+            querygap += 1
         if qseq[i]!=refseq[i] and refseq[i]!='-' and qseq[i]!='-':
             details.append(fastaid)
             details.append(ref)
-            details.append(str(qstart+i))
+            details.append(str(qstart+i-querygap))
             if strandforward:
-                details.append(str(refstart+i))
+                details.append(str(refstart+i-refgap))
             else:
-                details.append(str(refstart-i))
+                details.append(str(refstart-i+refgap))
             details.append(qseq[i])
             details.append(refseq[i])
             details.append(getNeighborBase(qseq, i, -3))
