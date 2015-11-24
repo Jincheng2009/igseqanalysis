@@ -4,7 +4,6 @@ import os
 from Bio import SeqIO
 import csv
 import getopt
-from multiprocessing.reduction import send_handle
 
 
 def analyzeMutation(qstart, qseq, refstart, refseq, fastaid, ref, strandforward):
