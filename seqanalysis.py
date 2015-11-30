@@ -36,9 +36,9 @@ def extractCDR3(file_in, file_out, atype):
         start = 103
         end = 13
     proc1 = subprocess.Popen(["java", "-cp", deepseqpath, "uk.co.catplc.deepseq.analysis.TrimFasta", str(start), str(end)], 
-                             stdin=data_input, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                             stdin=data_input, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     proc2 = subprocess.Popen(["java", "-cp", deepseqpath, "uk.co.catplc.deepseq.analysis.FilterByFeature", "."], 
-                              stdin=proc1.stdout, stdout=output, stderr=subprocess.PIPE, shell=True)
+                              stdin=proc1.stdout, stdout=output, stderr=subprocess.PIPE)
     for line in proc1.stderr:
         print line
     for line in proc2.stderr:
@@ -57,7 +57,7 @@ def pairByFastaID(fileVH, fileVL, file_out):
     print "Output to: " + file_out
     proc = subprocess.Popen(["java", "-cp", deepseqpath, "uk.co.catplc.deepseq.analysis.ConcatenateFasta", 
                              "-l", fileVH, "-r", fileVL, "-germline", "-delim", ":"], 
-                             stdout=output, stderr=subprocess.PIPE, shell=True)
+                             stdout=output, stderr=subprocess.PIPE)
     for line in proc.stderr:
         print line
 
@@ -70,9 +70,9 @@ def countUnique(file_in, file_out, sampleID):
     print "Counting unique sequence " + file_in 
     print "Output to: " + file_out
     proc1 = subprocess.Popen(["java", "-cp", deepseqpath, "uk.co.catplc.deepseq.analysis.Unique", sampleID],
-                            stdin=data_input, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                            stdin=data_input, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     proc2 = subprocess.Popen(["java", "-cp", deepseqpath, "uk.co.catplc.deepseq.analysis.Cluster2Count"],
-                            stdin=proc1.stdout, stdout=output, stderr=subprocess.PIPE, shell=True)
+                            stdin=proc1.stdout, stdout=output, stderr=subprocess.PIPE)
     for line in proc1.stderr:
         print line
     for line in proc2.stderr:
@@ -91,10 +91,10 @@ def clusterUnique(file_in, file_out, sampleID, start, end, identity=0.92):
     print "Cluster unique sequence " + file_in + " by identity " + str(identity)
     print "Output to: " + file_out
     proc1 = subprocess.Popen(["java", "-cp", deepseqpath, "uk.co.catplc.deepseq.analysis.Unique", sampleID],
-                            stdin=data_input, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                            stdin=data_input, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     clusterCmds = ["java", "-cp", deepseqpath, "uk.co.catplc.deepseq.analysis.FindClusterByCount",
                    "-c", "0", "-id", str(identity), "-s", str(start), "-e", str(end)]
-    proc2 = subprocess.Popen(clusterCmds, stdin=proc1.stdout, stdout=output, stderr=subprocess.PIPE, shell=True)
+    proc2 = subprocess.Popen(clusterCmds, stdin=proc1.stdout, stdout=output, stderr=subprocess.PIPE)
     for line in iter(proc1.stderr.readline, b''):
         print line.rstrip()
     for line in iter(proc2.stderr.readline, b''):
