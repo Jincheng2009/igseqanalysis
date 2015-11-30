@@ -93,7 +93,7 @@ def clusterUnique(file_in, file_out, sampleID, start, end, identity=0.92):
     proc1 = subprocess.Popen(["java", "-cp", deepseqpath, "uk.co.catplc.deepseq.analysis.Unique", sampleID],
                             stdin=data_input, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     clusterCmds = ["java", "-cp", deepseqpath, "uk.co.catplc.deepseq.analysis.FindClusterByCount",
-                   "-c", "0", "-id", str(identity), "-v", "-s", str(start), "-e", str(end)]
+                   "-c", "0", "-id", str(identity), "-s", str(start), "-e", str(end)]
     proc2 = subprocess.Popen(clusterCmds, stdin=proc1.stdout, stdout=output, stderr=subprocess.PIPE, shell=True)
     for line in iter(proc1.stderr.readline, b''):
         print line.rstrip()
