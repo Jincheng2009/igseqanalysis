@@ -69,6 +69,7 @@ def main(argv):
     
     fileout = open(fileout, "wb")
     writer = csv.writer(fileout)
+    writer.write('id, germline, query_pos, ref_pos, query_base, ref_base, b3, b2, b1, a1, a2, a3, mismatch, length, gap, phred')
     
     if extractCoverage:
         coveragefile = open(coverage_out, "w")
