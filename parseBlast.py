@@ -88,7 +88,7 @@ def main(argv):
             line=line.strip()
             if line.startswith("Query="): 
                 nextRefLength = False
-                fastaid=line[7:]
+                fastaid=line[7:].split(' ')[0]
                 quality=[]
                 count += 1
                 if extractFastq and fastq_dict.has_key(fastaid):
