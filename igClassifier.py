@@ -94,7 +94,7 @@ for row in cursor:
 cursor.close()
 qa_con.close()
 
-datapath="C:/Java/data/Andrew/mutation/"
+datapath="/home/wuji/data/andrew/mutation/"
 igM_0="0-IgM_S13.mutation.csv"
 igG_0="0-IgG_S21.mutation.csv"
 igA_24="24-IgA_S23.mutation.csv"
@@ -194,3 +194,4 @@ mut_df.columns = ['id', 'vgene', 'inCDR1', 'inCDR2', 'vlength', 'vcount', 'jgene
 mut_df['vrate'] = mut_df['vcount'] / mut_df['vlength']
 mut_df['jrate'] = mut_df['jcount'] / mut_df['jlength']
 
+mut_df.to_csv(datapath+"Ig.mutation.csv")
