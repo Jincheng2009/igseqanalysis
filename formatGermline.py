@@ -81,10 +81,10 @@ def main(argv):
 		line=line.rstrip()
 		seq = line.split("|");
 		seqid=seq[0]
-		vh=""
-		jh=""
-		vl=""
-		jl=""
+		vh="no match"
+		jh="no match"
+		vl="no match"
+		jl="no match"
 
 		info=seq[len(seq)-1]
 		germline = re.split(r"\++", info)
