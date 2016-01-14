@@ -4,7 +4,7 @@ import os, sys
 pypath="C:/java/uk.co.catplc.deepseq.analysis/pycode/"
 deepseqpath="C:/java/uk.co.catplc.deepseq.analysis/build/classes"
 
-def extractGermlineCount(file_in, file_out):
+def extractGermlineCount(file_in, file_out, chaintype="FULL"):
     if os.path.isfile(file_out) and os.path.getsize(file_out)>0:
         print file_out + " exists, skip"
         return
@@ -12,8 +12,13 @@ def extractGermlineCount(file_in, file_out):
     data_input = open(file_in)
     output = open(file_out, "w")
     print "Output to: " + file_out
-    # proc = subprocess.Popen(["head"], stdin=input, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    proc = subprocess.Popen(["python", pypath+"countGermline.py", "--igh", "--igl", "--igk"], stdin=data_input, stdout=output, stderr=subprocess.PIPE)
+    if chaintype=="VL":
+        commands=["python", pypath+"countGermline.py", "--igl", "--igk"]
+    elif chaintype=="VH":
+        commands=["python", pypath+"countGermline.py", "--igh"]
+    else:
+        commands=["python", pypath+"countGermline.py", "--igh", "--igl", "--igk"]
+    proc = subprocess.Popen(commands, stdin=data_input, stdout=output, stderr=subprocess.PIPE)
     for line in proc.stderr:
         sys.stdout.write(line)
     proc.wait()

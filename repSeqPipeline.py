@@ -85,7 +85,7 @@ for sample in samples:
     file_in=datapath+sample["annotation"]  
     fname=sample["basename"]+".germline.count"
     file_out=datapath+germline+fname
-    extractGermlineCount(file_in, file_out)
+    extractGermlineCount(file_in, file_out, sample["region"])
     sample["germline_count"]=germline+fname
     
 # 3. Extract CDR3 sequence
