@@ -167,11 +167,11 @@ def main(argv):
                         if extractFastq:
                             mutation.append(quality[int(mutation[2])])
                         if strandPlus:
-                            mutation.append(str(qstart))
-                            mutation.append(str(qstart + int(length) -1))
+                            mutation.append(str(sstart))
+                            mutation.append(str(sstart + int(length) -1))
                         else:
-                            mutation.append(str(qstart- int(length) +1))
-                            mutation.append(str(qstart))
+                            mutation.append(str(sstart- int(length) +1))
+                            mutation.append(str(sstart))
                         writer.writerow(mutation)
     
     # Output the coverage report
