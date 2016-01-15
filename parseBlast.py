@@ -150,6 +150,8 @@ def main(argv):
                 sseq = stokens[2].upper()
                 send = int(stokens[3])
                 # Update coverage based on alignment
+                a1=0
+                a2=0
                 if sstart > send:
                     a1 = send
                     a2 = sstart
@@ -166,12 +168,8 @@ def main(argv):
                         mutation.append(gap)
                         if extractFastq:
                             mutation.append(quality[int(mutation[2])])
-                        if strandPlus:
-                            mutation.append(str(sstart))
-                            mutation.append(str(sstart + int(length) -1))
-                        else:
-                            mutation.append(str(sstart- int(length) +1))
-                            mutation.append(str(sstart))
+                            mutation.append(str(a1))
+                            mutation.append(str(a2))
                         writer.writerow(mutation)
     
     # Output the coverage report
