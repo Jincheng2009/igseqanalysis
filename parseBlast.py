@@ -168,9 +168,9 @@ def main(argv):
                             mutation.append(quality[int(mutation[2])])
                         if strandPlus:
                             mutation.append(str(qstart))
-                            mutation.append(str(qstart + length-1))
+                            mutation.append(str(qstart + int(length) -1))
                         else:
-                            mutation.append(str(qstart-length+1))
+                            mutation.append(str(qstart- int(length) +1))
                             mutation.append(str(qstart))
                         writer.writerow(mutation)
     
