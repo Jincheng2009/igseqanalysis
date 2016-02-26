@@ -2,8 +2,10 @@ import sys
 import getopt
 
 def main(argv):
+    position = 0
+    trailing = False
     try:
-        opts, args = getopt.getopt(argv,"h")
+        opts, args = getopt.getopt(argv,"hpt")
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -11,7 +13,13 @@ def main(argv):
         if opt == "-h":
             usage()
             sys.exit()
-            
+        elif opt == "-p":
+            position = int(arg)
+        elif opt == "-t":
+            total = int(arg)
+        elif opt == "-e":
+            trailing = True
+                                    
     for line in sys.stdin:
         line = line.rstrip()
         if not line.strip():
@@ -21,8 +29,11 @@ def main(argv):
         else:
             seq = line
             length = len(seq)
-            index = length - 2
-            fill= "-" * (18 - length)
+            if trailing:
+                index = length - position
+            else:
+                index = position
+            fill= "-" * (total - length)
             newSeq=seq[:index] + fill + seq[index:]
             print newSeq
 
@@ -31,4 +42,4 @@ if __name__ == "__main__":
     main(sys.argv[1:])
     
 def usage():
-    print 'cat CDRL3.fasta | python formatCDR.py'
+    print 'cat CDRL3.fasta | python formatCDR.py -p 6 -t 23 -e'
