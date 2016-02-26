@@ -5,7 +5,7 @@ def main(argv):
     position = 0
     trailing = False
     try:
-        opts, args = getopt.getopt(argv,"hpt")
+        opts, args = getopt.getopt(argv,"hp:t:e")
     except getopt.GetoptError:
         usage()
         sys.exit(2)
