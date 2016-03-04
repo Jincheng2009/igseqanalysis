@@ -9,7 +9,7 @@ from seqanalysis import clusterUnique
 from seqanalysis import formatCluster
 
 # Point datapath to the folder that contain the fasta file
-datapath="C:/Java/data/sarav2/"
+datapath="C:/Java/data/sarav3/"
 # Input data files containing fasta format files after antibody annotation 
 # by uk.co.catplc.seqanalysis.blaze2.FastaAlignedProt or FastaAlignedProtVL
 prot="prot/"
@@ -19,6 +19,8 @@ germline="germline/"
 CDR="CDR/"
 # Output folder for clustered CDR sequences and their counting files
 cluster="cluster/"
+# Output folder for unpaired CDR sequences
+unpaired="unpaired/"
 
 # Create output folders if they do not exist
 if not os.path.exists(datapath+germline):
@@ -27,6 +29,8 @@ if not os.path.exists(datapath+CDR):
     os.mkdir(datapath+CDR)
 if not os.path.exists(datapath+cluster):
     os.mkdir(datapath+cluster)
+if not os.path.exists(datapath+unpaired):
+    os.mkdir(datapath+unpaired)
 
 # Get the prot fasta files in the folder
 protfiles=[ f for f in os.listdir(datapath+prot) if os.path.splitext(f)[1]==".prot"]
@@ -51,7 +55,7 @@ def parseSampleName(name, info):
     tokens = re.split("-|_", name)
 #   For Sarav's dataset    
     info["donor"]=tokens[0]
-    info["time"]=re.findall("\d+", tokens[1])[0]
+    info["time"]="NA" #re.findall("\d+", tokens[1])[0]
     info["protocol"]=re.findall("[a-zA-Z]+", tokens[1])[0]
     info["sampleID"]=tokens[2]
     info["region"]=readchain_map[tokens[3]]    
@@ -144,7 +148,7 @@ for sample in samples:
     clusterUnique(file_in, file_out, sample["sampleID"], 0, 25)
     sample["CDR_H3_uc"] = cluster + fname
 
-# 7. Cluster paired CDR3 sequences by CDR.H3
+# 7. Format cluster results
 for sample in samples:
     key="CDR_H3_uc"
     if not sample.has_key(key):
@@ -169,7 +173,7 @@ for sample in samples:
     clusterUnique(file_in, file_out, sample["sampleID"], 26, 43)
     sample["CDR_L3_uc"] = cluster + fname
 
-# 9. Cluster paired CDR3 sequences by CDR.L3
+# 9. Format cluster results
 for sample in samples:
     key="CDR_L3_uc"
     if not sample.has_key(key):
@@ -180,6 +184,48 @@ for sample in samples:
     file_out = datapath+cluster+fname
     formatCluster(file_in, file_out)
     sample["CDR_L3_cluster"] = cluster + fname
+
+# 10. Count unique CDR3 without pairing R1 and R2 by fasta ID
+for sample in samples:
+    key="CDR3"
+    if not sample.has_key(key):
+        print sample["annotation"] + " does not have associated file for: " + key 
+        continue
+    file_in = datapath + sample[key]
+    fname=sample["sampleID"] + "." + sample["region"] + ".CDR3.count"
+    file_out = datapath+unpaired+fname
+    countUnique(file_in, file_out, sample["sampleID"])
+    sample["CDR3_count"] = unpaired + fname
+
+# 11. Cluster unpaired CDR3 sequences
+for sample in samples:
+    key="CDR3"
+    if not sample.has_key(key):
+        print sample["annotation"] + " does not have associated file for: " + key 
+        continue
+    if sample["region"]=="VH":
+        start=0
+        end=25
+    elif sample["region"]=="VL":
+        start=0
+        end=18
+    file_in = datapath + sample[key]
+    fname=sample["sampleID"] + "." + sample["region"] + ".CDR3.uc"
+    file_out = datapath+unpaired+fname
+    clusterUnique(file_in, file_out, sample["sampleID"], start, end)
+    sample["unpaired_CDR3_uc"] = unpaired + fname
+
+# 12. Format cluster results
+for sample in samples:
+    key="unpaired_CDR3_uc"
+    if not sample.has_key(key):
+        print sample["annotation"] + " does not have associated file for: " + key 
+        continue
+    file_in = datapath + sample[key]
+    fname=sample["sampleID"] + "." + sample["region"] + ".CDR3.cluster"
+    file_out = datapath+unpaired+fname
+    formatCluster(file_in, file_out)
+    sample["unpaired_CDR3_cluster"] = unpaired + fname
 
 # Overwrite the metadata file to update
 # Close and reopen for writing
