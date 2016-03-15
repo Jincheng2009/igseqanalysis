@@ -1,5 +1,7 @@
 import subprocess
 import os, sys
+import re
+import pandas as pd
 
 pypath="C:/java/uk.co.catplc.deepseq.analysis/pycode/"
 deepseqpath="C:/java/uk.co.catplc.deepseq.analysis/build/classes"
@@ -23,6 +25,38 @@ def extractGermlineCount(file_in, file_out, chaintype="FULL"):
         sys.stdout.write(line)
     proc.wait()
     output.flush()
+
+def extractGermlineCDRCount(file_in, file_out, paired=False):
+    if os.path.isfile(file_out) and os.path.getsize(file_out)>0:
+        print file_out + " exists, skip"
+        return
+    print "Extracting germline and CDR3 counts for " + file_in
+    data_input = open(file_in, "r")
+    germlineCDR1 = [] 
+    for line in data_input.readlines():
+        if line.startswith(">"):
+            line=line.rstrip()
+            seq = line.split("|");
+            info=seq[len(seq)-1]
+            germline = re.split(r"\++", info)
+            germline.remove('')
+        elif not line.startswith(">"):
+            CDR3=line.rstrip()
+            record = [germline[0],germline[1],CDR3]
+            germlineCDR1.append(record)
+    
+    germlineCDR = pd.DataFrame.from_records(
+          ((r[0], r[1], r[2]) for r in germlineCDR1), 
+          columns=['vgene', 'jgene', 'cdr3'])
+    germlineCDR['count'] = 1
+    germlineCDR['vfamily'] = germlineCDR['vgene'].apply(lambda v : re.split(r"\*|-",  v)[0])
+    germlineCDR['jfamily'] = germlineCDR['jgene'].apply(lambda v : re.split(r"\*|-",  v)[0])
+    
+    germlineCDRCount = germlineCDR.groupby(['vgene', 'jgene','vfamily', 'jfamily','cdr3'])['count'].sum()
+    germlineCDRCount = germlineCDRCount.reset_index()
+    
+    germlineCDRCount.to_csv(file_out, sep='\t', index=False, header=False)
+    
 
 def extractCDR3(file_in, file_out, atype):
     if os.path.isfile(file_out) and os.path.getsize(file_out)>0:

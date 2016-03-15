@@ -7,6 +7,7 @@ from seqanalysis import extractGermlineCount
 from seqanalysis import pairByFastaID
 from seqanalysis import clusterUnique
 from seqanalysis import formatCluster
+from seqanalysis import extractGermlineCDRCount
 
 # Point datapath to the folder that contain the fasta file
 datapath="C:/Java/data/sarav3/"
@@ -56,7 +57,7 @@ def parseSampleName(name, info):
 #   For Sarav's dataset    
     info["donor"]=tokens[0]
     info["time"]="NA" #re.findall("\d+", tokens[1])[0]
-    info["protocol"]=re.findall("[a-zA-Z]+", tokens[1])[0]
+    info["protocol"]=tokens[1]
     info["sampleID"]=tokens[2]
     info["region"]=readchain_map[tokens[3]]    
 #     For george's dataset from NCBI
@@ -226,6 +227,18 @@ for sample in samples:
     file_out = datapath+unpaired+fname
     formatCluster(file_in, file_out)
     sample["unpaired_CDR3_cluster"] = unpaired + fname
+
+# 13. Get CDR3 with germline information
+for sample in samples:
+    key="CDR3"
+    if not sample.has_key(key):
+        print sample["annotation"] + " does not have associated file for: " + key 
+        continue
+    file_in = datapath + sample[key]
+    fname=sample["sampleID"] + "." + sample["region"] + ".germline.CDR3.count"
+    file_out = datapath+germline+fname
+    extractGermlineCDRCount(file_in, file_out)
+    sample["germline_CDR3_count"] = germline + fname
 
 # Overwrite the metadata file to update
 # Close and reopen for writing
