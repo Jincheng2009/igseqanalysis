@@ -240,6 +240,19 @@ for sample in samples:
     extractGermlineCDRCount(file_in, file_out)
     sample["germline_CDR3_count"] = germline + fname
 
+# 14. Get paired CDR3 with heavy and light chain germline information
+for sample in samples:
+    key="paired_CDR3"
+    if not sample.has_key(key):
+        print sample["annotation"] + " does not have associated file for: " + key 
+        continue
+    file_in = datapath + sample[key]
+    fname=sample["sampleID"] + "." + sample["region"] + "paired.germline.CDR3.count"
+    file_out = datapath+germline+fname
+    extractGermlineCDRCount(file_in, file_out, True)
+    sample["paired_germline_CDR3_count"] = germline + fname
+
+
 # Overwrite the metadata file to update
 # Close and reopen for writing
 metafile=open(metafname, "w")

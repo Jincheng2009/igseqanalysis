@@ -40,21 +40,38 @@ def extractGermlineCDRCount(file_in, file_out, paired=False):
             info=seq[len(seq)-1]
             germline = re.split(r"\++", info)
             germline.remove('')
+            if paired:
+                infoVH = seq[len(seq)-2]
+                germlineVH = re.split(r"\++", infoVH)
+                germlineVH.remove('')
+                germlineVH.extend(germline)
+                germline = germlineVH
         elif not line.startswith(">"):
             CDR3=line.rstrip()
-            record = [germline[0],germline[1],CDR3]
+            record = germline
+            record.append(CDR3)
             germlineCDR1.append(record)
     
-    germlineCDR = pd.DataFrame.from_records(
-          ((r[0], r[1], r[2]) for r in germlineCDR1), 
-          columns=['vgene', 'jgene', 'cdr3'])
-    germlineCDR['count'] = 1
-    germlineCDR['vfamily'] = germlineCDR['vgene'].apply(lambda v : re.split(r"\*|-",  v)[0])
-    germlineCDR['jfamily'] = germlineCDR['jgene'].apply(lambda v : re.split(r"\*|-",  v)[0])
-    
-    germlineCDRCount = germlineCDR.groupby(['vgene', 'jgene','vfamily', 'jfamily','cdr3'])['count'].sum()
+    if not paired:
+        germlineCDR = pd.DataFrame.from_records(
+              ((r[0], r[1], r[2]) for r in germlineCDR1), 
+              columns=['vgene', 'jgene', 'cdr3'])
+        germlineCDR['count'] = 1
+        germlineCDR['vfamily'] = germlineCDR['vgene'].apply(lambda v : re.split(r"\*|-",  v)[0])
+        germlineCDR['jfamily'] = germlineCDR['jgene'].apply(lambda v : re.split(r"\*|-",  v)[0])
+        germlineCDRCount = germlineCDR.groupby(['vgene', 'jgene','vfamily', 'jfamily','cdr3'])['count'].sum()
+    else:
+        germlineCDR = pd.DataFrame.from_records(
+              ((r[0], r[1], r[2], r[3], r[4]) for r in germlineCDR1), 
+              columns=['vhgene', 'jhgene', 'vlgene', 'jlgene','cdr3'])
+        germlineCDR['count'] = 1
+        germlineCDR['vhfamily'] = germlineCDR['vhgene'].apply(lambda v : re.split(r"\*|-",  v)[0])
+        germlineCDR['jhfamily'] = germlineCDR['jhgene'].apply(lambda v : re.split(r"\*|-",  v)[0])
+        germlineCDR['vlfamily'] = germlineCDR['vlgene'].apply(lambda v : re.split(r"\*|-",  v)[0])
+        germlineCDR['jlfamily'] = germlineCDR['jlgene'].apply(lambda v : re.split(r"\*|-",  v)[0])
+        germlineCDRCount = germlineCDR.groupby(['vhgene', 'jhgene','vhfamily', 'jhfamily', 'vlgene', 'jlgene','vlfamily', 'jlfamily', 'cdr3'])['count'].sum()
+
     germlineCDRCount = germlineCDRCount.reset_index()
-    
     germlineCDRCount.to_csv(file_out, sep='\t', index=False, header=False)
     
 
