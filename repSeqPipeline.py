@@ -247,7 +247,7 @@ for sample in samples:
         print sample["annotation"] + " does not have associated file for: " + key 
         continue
     file_in = datapath + sample[key]
-    fname=sample["sampleID"] + "." + sample["region"] + "paired.germline.CDR3.count"
+    fname=sample["sampleID"] + "." + sample["region"] + ".paired.germline.CDR3.count"
     file_out = datapath+germline+fname
     extractGermlineCDRCount(file_in, file_out, True)
     sample["paired_germline_CDR3_count"] = germline + fname
