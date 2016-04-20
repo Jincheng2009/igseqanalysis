@@ -1,11 +1,13 @@
 ---
 title: "VH-VL pairing evaluation for B-cell repertoire deep sequencing"
 author: "Jincheng Wu"
-date: "Friday, Mar 4th, 2016"
+date: "Apr 20th, 2016"
 output: html_document
 ---
 
 #### 1. Quality check for the dataset
+
+Data source: http://www.nature.com/nm/journal/v21/n1/full/nm.3743.html
 
 ```{r quality check, cache=TRUE, echo=FALSE, warning=FALSE}
 rm(list=ls())
@@ -15,7 +17,7 @@ library(plyr)
 library(rjson)
 library(rmarkdown)
 
-metafile <- "C:/Java/data/sarav5/metadata.json"
+metafile <- "C:/Java/data/george2/metadata.json"
 datapath <- dirname(metafile)
 
 metadata <- fromJSON(file=metafile)
@@ -76,7 +78,10 @@ Next, we evaluated the diversity of library generated in each sample using CDR-H
 library(plyr)
 cdr.h3.cluster <- subset(cdr.count, region=="VH")
 cdr.h3.count <- count(cdr.h3.cluster, vars=c("sample","region"))
+count_no_single <- count(subset(cdr.h3.cluster, count>1), vars=c("sample","region"))
 cdr.h3.count <- rename(cdr.h3.count, c("freq"="unique count"))
+count_no_single <- rename(count_no_single, c("freq"="unique count (singleton excluded)"))
+cdr.h3.count <- merge(cdr.h3.count, count_no_single)
 info <- total.count[,c(1,2,3,7)]
 cdr.h3.count <- merge(cdr.h3.count, info)
 ```
@@ -227,8 +232,8 @@ countPairStat <- function(input) {
     CDR.H3.pair.count
 }
 
-data.filter <- data[data$count>1,]
-CDR.H3.pair.count <- countPairStat(data.filter)
+# data.filter <- data[data$count>1,]
+# CDR.H3.pair.count <- countPairStat(data.filter)
 cluster.CDR.H3.pair.count <- countPairStat(data.cluster[data.cluster$count>1,])
 ```
 
