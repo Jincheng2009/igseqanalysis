@@ -47,6 +47,7 @@ def getNeighborBase(seq, idx, shift):
 def main(argv):
     extractFastq=False
     extractCoverage=False
+    readFromFile=False
     try:
         opts, args = getopt.getopt(argv,"h", ["blast=","fastq=","mutation=","coverage="])
     except getopt.GetoptError:
@@ -61,6 +62,7 @@ def main(argv):
             fastqfile = arg
         elif opt == "--blast":
             blastfile = arg
+            readFromFile=True
         elif opt == "--mutation":
             fileout = arg
         elif opt == "--coverage":
@@ -82,7 +84,7 @@ def main(argv):
     coverage = {}
     strandPlus=True
     
-    if blastfile:
+    if readFromFile:
         filein = open(blastfile)
     else:
         filein = sys.stdin
