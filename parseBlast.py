@@ -81,96 +81,100 @@ def main(argv):
     printNext = 0
     coverage = {}
     strandPlus=True
-    with open(blastfile) as filein:
+    
+    if blastfile:
+        filein = open(blastfile)
+    else:
+        filein = sys.stdin
         
-        for line in filein:
-            line=line.rstrip()
-            line=line.strip()
-            if line.startswith("Query="): 
-                nextRefLength = False
-                fastaid=line[7:].split(' ')[0]
-                quality=[]
-                count += 1
-                if extractFastq and fastq_dict.has_key(fastaid):
-                    quality = fastq_dict[fastaid].letter_annotations["phred_quality"]
-                if count >= printNext:
-                    sys.stderr.write("Processed: " + str(count) + "\n")
-                    printNext = printNext + 10000
-    
-            if line.startswith(">"):
-                ref = line[1:] 
-                nextRefLength = True
-            if line.startswith("Length=") and nextRefLength:
-                nextRefLength = False
-                try:
-                    found = re.search('Length=(\d+)', line).group(1)
-                except AttributeError:
-                    # AAA, ZZZ not found in the original string
-                    found = 'NA'
-                refLength = int(found)
-                if not coverage.has_key(ref):
-                    refInfo = {}
-                    for i in range(1,refLength):
-                        refInfo[i]=0
-                    coverage[ref] = refInfo
-                
-                
-            if line.startswith("Identities ="):
-                try:
-                    found = re.search('Identities = (\d+/\d+).*', line).group(1)
-                except AttributeError:
-                    # AAA, ZZZ not found in the original string
-                    found = 'NA'
-                tokens = found.split('/')
-                mismatch = str(int(tokens[1]) - int(tokens[0]))
-                length = tokens[1]
-                try:
-                    found = re.search('Gaps = (\d+/\d+).*', line).group(1)
-                except AttributeError:
-                    # AAA, ZZZ not found in the original string
-                    found = 'NA'
-                gap = found.split('/')[0]
-                
-            if line.startswith("Strand="):
-                if line=="Strand=Plus/Minus":
-                    strandPlus=False
-                else:
-                    strandPlus=True
-    
-            if line.startswith("Query") and not line.startswith("Query="):
-                qtokens = line.split(" ")
-                qtokens = filter(lambda a: a!="", qtokens)
-                qstart = int(qtokens[1])
-                qseq = qtokens[2].upper()
-    
-            if line.startswith("Sbjct"):
-                stokens = line.split(" ")
-                stokens = filter(lambda a: a!="", stokens)
-                sstart = int(stokens[1])
-                sseq = stokens[2].upper()
-                send = int(stokens[3])
-                # Update coverage based on alignment
-                a1=0
-                a2=0
-                if sstart > send:
-                    a1 = send
-                    a2 = sstart
-                else:
-                    a1 = sstart
-                    a2 = send
-                for i in range(a1,a2):
-                    coverage.get(ref)[i] += 1
-                records = analyzeMutation(qstart, qseq, sstart, sseq, fastaid, ref, strandPlus)
-                if len(records) > 0:
-                    for mutation in records:
-                        mutation.append(mismatch)
-                        mutation.append(length)
-                        mutation.append(gap)
-                        if extractFastq:
-                            mutation.append(quality[int(mutation[2])])
-                            mutation.append(str(a1))
-                            mutation.append(str(a2))
-                        writer.writerow(mutation)
+    for line in filein:
+        line=line.rstrip()
+        line=line.strip()
+        if line.startswith("Query="): 
+            nextRefLength = False
+            fastaid=line[7:].split(' ')[0]
+            quality=[]
+            count += 1
+            if extractFastq and fastq_dict.has_key(fastaid):
+                quality = fastq_dict[fastaid].letter_annotations["phred_quality"]
+            if count >= printNext:
+                sys.stderr.write("Processed: " + str(count) + "\n")
+                printNext = printNext + 10000
+
+        if line.startswith(">"):
+            ref = line[1:] 
+            nextRefLength = True
+        if line.startswith("Length=") and nextRefLength:
+            nextRefLength = False
+            try:
+                found = re.search('Length=(\d+)', line).group(1)
+            except AttributeError:
+                # AAA, ZZZ not found in the original string
+                found = 'NA'
+            refLength = int(found)
+            if not coverage.has_key(ref):
+                refInfo = {}
+                for i in range(1,refLength):
+                    refInfo[i]=0
+                coverage[ref] = refInfo
+            
+            
+        if line.startswith("Identities ="):
+            try:
+                found = re.search('Identities = (\d+/\d+).*', line).group(1)
+            except AttributeError:
+                # AAA, ZZZ not found in the original string
+                found = 'NA'
+            tokens = found.split('/')
+            mismatch = str(int(tokens[1]) - int(tokens[0]))
+            length = tokens[1]
+            try:
+                found = re.search('Gaps = (\d+/\d+).*', line).group(1)
+            except AttributeError:
+                # AAA, ZZZ not found in the original string
+                found = 'NA'
+            gap = found.split('/')[0]
+            
+        if line.startswith("Strand="):
+            if line=="Strand=Plus/Minus":
+                strandPlus=False
+            else:
+                strandPlus=True
+
+        if line.startswith("Query") and not line.startswith("Query="):
+            qtokens = line.split(" ")
+            qtokens = filter(lambda a: a!="", qtokens)
+            qstart = int(qtokens[1])
+            qseq = qtokens[2].upper()
+
+        if line.startswith("Sbjct"):
+            stokens = line.split(" ")
+            stokens = filter(lambda a: a!="", stokens)
+            sstart = int(stokens[1])
+            sseq = stokens[2].upper()
+            send = int(stokens[3])
+            # Update coverage based on alignment
+            a1=0
+            a2=0
+            if sstart > send:
+                a1 = send
+                a2 = sstart
+            else:
+                a1 = sstart
+                a2 = send
+            for i in range(a1,a2):
+                coverage.get(ref)[i] += 1
+            records = analyzeMutation(qstart, qseq, sstart, sseq, fastaid, ref, strandPlus)
+            if len(records) > 0:
+                for mutation in records:
+                    mutation.append(mismatch)
+                    mutation.append(length)
+                    mutation.append(gap)
+                    if extractFastq:
+                        mutation.append(quality[int(mutation[2])])
+                        mutation.append(str(a1))
+                        mutation.append(str(a2))
+                    writer.writerow(mutation)
     
     # Output the coverage report
     if extractCoverage:
