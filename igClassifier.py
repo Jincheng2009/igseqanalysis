@@ -4,7 +4,6 @@ import cx_Oracle
 import xml.etree.ElementTree as ET
 from pandas import DataFrame
 import numpy as np
-from preprocess import sample1, sample2
 
 
 class Sequence:
@@ -95,52 +94,81 @@ for row in cursor:
 cursor.close()
 qa_con.close()
 
+
+# Test
+for ra in germlineDict['IGHJ1*01'].getAllAnnotations():
+    print ra.getType() + "\t" + ra.getValue() + "\t" + str(ra.getRange()[0]) + "\t" + str(ra.getRange()[1])
+    
 ######################################
 ## Custom import data section
 ######################################
-# datapath="C:/java/data/Andrew/mutation/"
-# igM_0="0-IgM_S13.mutation.csv"
-# igG_0="0-IgG_S21.mutation.csv"
+##########Andrew's data
+datapath="C:/java/data/Andrew/mutation/"
+igM_0="0-IgM_S13_L001_R1_001.vh.mutation.csv"
+igG_0="0-IgG_S21_L001_R1_001.vh.mutation.csv"
 # igA_24="24-IgA_S23.mutation.csv"
-#  
-# df = pd.read_csv(datapath + igM_0, header=None)
-# df['isotype'] = 'IgM'
-# 
-# temp = pd.read_csv(datapath + igG_0, header=None)
-# temp['isotype'] = 'IgG'
-# df = pd.concat([df, temp])
-# 
+  
+df = pd.read_csv(datapath + igM_0, header=None)
+df['isotype'] = 'IgM'
+ 
+temp = pd.read_csv(datapath + igG_0, header=None)
+temp['isotype'] = 'IgG'
+df = pd.concat([df, temp])
+ 
 # temp = pd.read_csv(datapath + igA_24, header=None)
 # temp['isotype'] = 'IgA'
 # df = pd.concat([df, temp])
-# 
-# df.columns = ['id', 'germline', 'query_pos', 'ref_pos', 'query_base', 'ref_base', 'b3', 'b2', 'b1', 'a1', 'a2', 'a3', 'mismatch', 'length', 'gap', 'phred', 'isotype']
+ 
+df.columns = ['id', 'germline', 'query_pos', 'ref_pos', 'query_base', 'ref_base', 'b3', 'b2', 'b1', 'a1', 'a2', 'a3', 'mismatch', 'length', 'gap', 'phred', 'refstart','refend','isotype']
 
+########Steven's data
 datapath="C:/java/data/steven/mutation/"
-sample1="SRR1383461.mutation.csv"
-sample2="SRR1383463.mutation.csv"
-sample3="SRR1383466.mutation.csv"
-  
+sample1="SRR1383461_2.vh.mutation.csv"
+# sample1="SRR1383461.mutation.csv"
+# sample2="SRR1383463.mutation.csv"
+# sample3="SRR1383466.mutation.csv"
+#   
 df = pd.read_csv(datapath + sample1, header=None)
 df['sample'] = 'SRR1383461'
- 
-temp = pd.read_csv(datapath + sample2, header=None)
-temp['sample'] = 'SRR1383463'
-df = pd.concat([df, temp])
- 
-temp = pd.read_csv(datapath + sample3, header=None)
-temp['sample'] = 'SRR1383466'
-df = pd.concat([df, temp])
- 
+df = df.iloc[0:1000000,]
+#  
+# temp = pd.read_csv(datapath + sample2, header=None)
+# temp['sample'] = 'SRR1383463'
+# df = pd.concat([df, temp])
+#  
+# temp = pd.read_csv(datapath + sample3, header=None)
+# temp['sample'] = 'SRR1383466'
+# df = pd.concat([df, temp])
+#  
 df.columns = ['id', 'germline', 'query_pos', 'ref_pos', 'query_base', 'ref_base', 'b3', 'b2', 'b1', 'a1', 'a2', 'a3', 'mismatch', 'length', 'gap', 'phred', 'sample']
-df['id'] = df['sample'].astype(str) + "." +df['id'].astype(str)
+# df['id'] = df['sample'].astype(str) + "." +df['id'].astype(str)
+isotype=pd.read_csv(datapath+"isotype.csv")
+isotype = isotype[['id','isotype']]
+
+df['sid'] = df['sample'] + "." + df['id'].map(str)
+df = df.drop(['id'],axis=1)
+df = df.rename(columns={'sid':'id'})
+df = pd.merge(df, isotype, on='id')
 ######################################
 ######################################
-
-
 df = df.drop(['b3','b2','b1','a1','a2','a3'], axis=1)
 df['germline'] = df['germline'].str.strip()
-   
+
+###########Test
+mut_df = df.drop_duplicates(['id','germline','mismatch','length'])
+mut_df1 = mut_df.groupby(['id', 'isotype']).agg({
+                                     'length': np.max
+                                     })
+
+mut_df1 = mut_df1.reset_index()
+mut_df2 = mut_df[['id','germline','length','mismatch']]
+
+mut_df3 = pd.merge(mut_df1, mut_df2, on=['id','length'])
+
+mut_df3['misfrac'] = mut_df3['mismatch']/mut_df3['length']
+mut_df3.groupby(['isotype'])['misfrac'].mean()
+
+########################################End test   
 germlineTab={}   
 for key in germlineDict:
     coordinate ={}
@@ -213,17 +241,11 @@ j_mut_df = j_df.groupby(['id', 'germline']).agg({
 
 j_mut_df = j_mut_df.reset_index()
 
-j_mut_df.head(30)
-
 mut_df = pd.merge(v_mut_df, j_mut_df, on='id')
 
 mut_df.columns = ['id', 'vgene', 'inCDR1', 'inCDR2', 'vlength', 'vcount', 'jgene', 'jlength', 'jcount']
 mut_df['vrate'] = mut_df['vcount'] / mut_df['vlength']
 mut_df['jrate'] = mut_df['jcount'] / mut_df['jlength']
-
-#germline_df = df[['id','isotype']]
-#germline_df = germline_df.drop_duplicates()
-#mut_df = pd.merge(mut_df, germline_df, on='id')
 
 phred_df = df.groupby(['id','query_pos'])['phred'].max()
 phred_df = phred_df.reset_index()
