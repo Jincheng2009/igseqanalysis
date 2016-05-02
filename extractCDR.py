@@ -9,6 +9,7 @@ complement['A'] = 'T'
 complement['T'] = 'A'
 complement['G'] = 'C'
 complement['C'] = 'G'
+complement['-'] = '-'
 
 CDRH1start = 115 + 1
 CDRH1end = 130 + 1
