@@ -5,6 +5,13 @@ from Bio import SeqIO
 import csv
 import getopt
 
+complement={}
+complement['A'] = 'T'
+complement['T'] = 'A'
+complement['G'] = 'C'
+complement['C'] = 'G'
+complement['-'] = '-'
+complement['N'] = 'N'
 
 def analyzeMutation(qstart, qseq, refstart, refseq, fastaid, ref, strandforward):
     if len(qseq) != len(refseq):
@@ -26,14 +33,24 @@ def analyzeMutation(qstart, qseq, refstart, refseq, fastaid, ref, strandforward)
                 details.append(str(refstart+i-refgap))
             else:
                 details.append(str(refstart-i+refgap))
-            details.append(qseq[i])
-            details.append(refseq[i])
-            details.append(getNeighborBase(qseq, i, -3))
-            details.append(getNeighborBase(qseq, i, -2))
-            details.append(getNeighborBase(qseq, i, -1))
-            details.append(getNeighborBase(qseq, i, 1))
-            details.append(getNeighborBase(qseq, i, 2))
-            details.append(getNeighborBase(qseq, i, 3))
+            if strandforward:
+                details.append(qseq[i])
+                details.append(refseq[i])
+                details.append(getNeighborBase(qseq, i, -3))
+                details.append(getNeighborBase(qseq, i, -2))
+                details.append(getNeighborBase(qseq, i, -1))
+                details.append(getNeighborBase(qseq, i, 1))
+                details.append(getNeighborBase(qseq, i, 2))
+                details.append(getNeighborBase(qseq, i, 3))
+            else:
+                details.append(complement[qseq[i]])
+                details.append(complement[refseq[i]])
+                details.append(complement[getNeighborBase(qseq, i, -3)])
+                details.append(complement[getNeighborBase(qseq, i, -2)])
+                details.append(complement[getNeighborBase(qseq, i, -1)])
+                details.append(complement[getNeighborBase(qseq, i, 1)])
+                details.append(complement[getNeighborBase(qseq, i, 2)])
+                details.append(complement[getNeighborBase(qseq, i, 3)])
             mutations.append(details)
     return mutations
 
