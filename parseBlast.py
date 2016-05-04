@@ -12,6 +12,7 @@ complement['G'] = 'C'
 complement['C'] = 'G'
 complement['-'] = '-'
 complement['N'] = 'N'
+complement['NA'] = 'NA'
 
 def analyzeMutation(qstart, qseq, refstart, refseq, fastaid, ref, strandforward):
     if len(qseq) != len(refseq):
