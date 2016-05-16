@@ -5,8 +5,9 @@ import getopt
 
 def main(argv):
     germline = pd.read_csv("/home/wuji/germlinedb/germline.csv")
+    append=False
     try:
-        opts, args = getopt.getopt(argv,"h", ["output="])
+        opts, args = getopt.getopt(argv,"ha", ["output="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -16,6 +17,8 @@ def main(argv):
             sys.exit()
         elif opt == "--output":
             fileout = arg
+        elif opt == "-a":
+            append=True
     ######################################
     ## Custom import data section
     ######################################  
@@ -64,7 +67,10 @@ def main(argv):
     count_table['gene'] = count_table['germline'].map(lambda g : g.split("*")[0])
     
     # 6. Output data into csv file
-    count_table.to_csv(fileout, index=False)
+    if append:
+        count_table.to_csv(fileout, mode='a', index=False)
+    else:
+        count_table.to_csv(fileout, index=False)
     
 
 def usage():
