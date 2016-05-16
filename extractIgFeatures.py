@@ -42,10 +42,10 @@ def main(argv):
     df_count = df_count.reset_index()
     
     # 3.temp Get the germline alignment length data
-    df_germline = df[['id','isotype','germline','length']].drop_duplicates()
-    df_germline = df_germline[df_germline['germline'].str.startswith("IGHV")]
-    df_germline[df_germline['isotype']=='IgG']['length'].describe()
-    df_germline[df_germline['isotype']=='IgM']['length'].describe()
+    #df_germline = df[['id','isotype','germline','length']].drop_duplicates()
+    #df_germline = df_germline[df_germline['germline'].str.startswith("IGHV")]
+    #df_germline[df_germline['isotype']=='IgG']['length'].describe()
+    #df_germline[df_germline['isotype']=='IgM']['length'].describe()
     
     # 4. Reorder columns
     count_table = df_count.pivot(index="id", columns="label", values="count")
