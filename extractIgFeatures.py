@@ -58,11 +58,10 @@ def main(argv):
     count_table['id'] = count_table.index
     
     # 5. Join kabat mutation table with sequence information
-    df1 = df[['id', 'germline', 'isotype']].drop_duplicates()
+    df1 = df[['id', 'germline']].drop_duplicates()
     df1 = df1[df1['germline'].str.startswith("IGHV")]
     count_table = pd.merge(count_table, df1, on=['id'])
     count_table['gene'] = count_table['germline'].map(lambda g : g.split("*")[0])
-    
     
     # 6. Output data into csv file
     count_table.to_csv(fileout, index=False)
