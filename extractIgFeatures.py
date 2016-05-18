@@ -68,7 +68,7 @@ def main(argv):
     
     # 6. Output data into csv file
     if append:
-        count_table.to_csv(fileout, mode='a', index=False)
+        count_table.to_csv(fileout, mode='a', index=False, header=True)
     else:
         count_table.to_csv(fileout, index=False)
     
