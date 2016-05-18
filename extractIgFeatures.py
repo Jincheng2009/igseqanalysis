@@ -54,7 +54,15 @@ def main(argv):
     count_table = df_count.pivot(index="id", columns="label", values="count")
     cols = count_table.columns.tolist()
     cols = natsorted(cols)
-    count_table = count_table[cols]
+    # Fill in missing columns
+    full_cols = natsorted(set(germline['label']))
+    miss_cols = set(full_cols) - set(cols)
+    if len(miss_cols) > 0:
+        index = count_table.index
+        miss_table = pd.DataFrame(index=index, columns=miss_cols)
+        count_table = pd.concat([count_table, miss_table], axis=1, join='inner')
+    
+    count_table = count_table[full_cols]
     cols_final = map(lambda g : "H" + g, cols)
     count_table.columns = cols_final
     count_table = count_table.fillna(0)
