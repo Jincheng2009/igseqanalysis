@@ -10,6 +10,11 @@ complement['T'] = 'A'
 complement['G'] = 'C'
 complement['C'] = 'G'
 complement['-'] = '-'
+complement['a'] = 't'
+complement['t'] = 'a'
+complement['g'] = 'c'
+complement['c'] = 'g'
+complement['-'] = '-'
 
 CDRH1start = 115 + 1
 CDRH1end = 130 + 1
@@ -172,14 +177,14 @@ def main(argv):
             qtokens = line.split(" ")
             qtokens = filter(lambda a: a!="", qtokens)
             qstart = int(qtokens[1])
-            qseq = qtokens[2].upper()
+            qseq = qtokens[2]
             qend = int(qtokens[3])
 
         if line.startswith("Sbjct"):
             stokens = line.split(" ")
             stokens = filter(lambda a: a!="", stokens)
             sstart = int(stokens[1])
-            sseq = stokens[2].upper()
+            sseq = stokens[2]
             send = int(stokens[3])
             # Update coverage based on alignment
             a1=0
