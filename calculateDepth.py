@@ -22,7 +22,7 @@ def main(argv):
     
     ##########Coverage
     df = pd.read_csv(sys.stdin, header=None)
-    df.columns = ['germline', 'ref_pos', 'depth']
+    df.columns = ['gene', 'ref_pos', 'depth']
     
     df['gene'] = df['gene'].map(str.strip)
     
