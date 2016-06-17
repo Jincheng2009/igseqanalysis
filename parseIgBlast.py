@@ -32,8 +32,8 @@ def main(argv):
             extractCoverage=True
             coverage_out = arg
     
-    fileout = open(fileout, "wb")
-    writer = csv.writer(fileout)
+    # fileout = open(fileout, "wb")
+    # writer = csv.writer(fileout)
     # writer.writerow('id, germline, query_pos, ref_pos, query_base, ref_base, b3, b2, b1, a1, a2, a3, mismatch, length, gap, phred')
     
     if extractCoverage:
