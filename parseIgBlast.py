@@ -2,7 +2,6 @@ import sys
 import re
 import os
 from Bio import SeqIO
-import csv
 import getopt
 from sequtility import Alignment
 from sequtility import Sequence 
@@ -36,12 +35,6 @@ def main(argv):
     # writer = csv.writer(fileout)
     # writer.writerow('id, germline, query_pos, ref_pos, query_base, ref_base, b3, b2, b1, a1, a2, a3, mismatch, length, gap, phred')
     
-    if extractCoverage:
-        coveragefile = open(coverage_out, "w")
-                            
-    if extractFastq and os.path.isfile(fastqfile):
-        fastq_dict=SeqIO.index(fastqfile,"fastq")
-    
     count = 0
     printNext = 0
     coverage = {}
@@ -59,6 +52,13 @@ def main(argv):
     extractAlign=False
     nafter=0
     previous_line=""
+    
+    if extractCoverage:
+        coveragefile = open(coverage_out, "w")
+                            
+    if extractFastq and os.path.isfile(fastqfile):
+        fastq_dict=SeqIO.index(fastqfile,"fastq")
+
     for line in filein:
         ## Not trim the end when parsing the alignment section
         line = line.strip('\n')
@@ -98,9 +98,13 @@ def main(argv):
             if align_record is not None:
                 for record in align_record.getMutations():
                     outline = ""
+                    if len(quality) > 0:
+                        phred = quality[int(record[2])]
+                    else:
+                        phred = "NA"
                     for item in record:
                         outline = outline + "," + str(item)
-                    outline = outline[1:] + "\n"
+                    outline = outline[1:] + "," + str(phred) + "\n"
                     sys.stdout.write(outline)    
     
         ## Extract germline genes
