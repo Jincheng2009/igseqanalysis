@@ -69,6 +69,12 @@ class Alignment:
             sys.stdout.write(self.vseq.getSequence() + "\n")
         if self.jseq is not None:
             sys.stdout.write(self.jseq.getSequence() + "\n")
+    
+    def get_v_sequence(self):
+        return self.vseq
+    
+    def get_j_sequence(self):
+        return self.jseq
                 
     def getMutations(self):
         mutations = []
@@ -158,7 +164,7 @@ class Sequence:
         self.prot=""
         
     def getRange(self):
-        return [self.start, self.end]
+        return [int(self.start), int(self.end)]
     
     def getSequence(self):
         return self.seq

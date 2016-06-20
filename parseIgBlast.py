@@ -3,8 +3,11 @@ import re
 import os
 from Bio import SeqIO
 import getopt
+import pandas as pd
 from sequtility import Alignment
 from sequtility import Sequence 
+
+germline_file = "/home/wuji/tools/imgt/germline_kabat.csv"
 
 def main(argv):
     extractFastq=False
@@ -34,7 +37,7 @@ def main(argv):
     # fileout = open(fileout, "wb")
     # writer = csv.writer(fileout)
     # writer.writerow('id, germline, query_pos, ref_pos, query_base, ref_base, b3, b2, b1, a1, a2, a3, mismatch, length, gap, phred')
-    
+
     count = 0
     printNext = 0
     coverage = {}
@@ -54,7 +57,9 @@ def main(argv):
     previous_line=""
     
     if extractCoverage:
-        coveragefile = open(coverage_out, "w")
+        coverage = pd.read_csv(germline_file, header=None)
+        coverage.columns = ["gene","position","kabat"]
+        coverage["depth"] = 0
                             
     if extractFastq and os.path.isfile(fastqfile):
         fastq_dict=SeqIO.index(fastqfile,"fastq")
@@ -148,7 +153,7 @@ def main(argv):
             nafter=0
             align_record = Alignment(fastaid, query_length)
             query_seq = None
-            seq = None
+            vseq = None
             dseq = None
             jseq = None
             astart = 0   
@@ -167,11 +172,11 @@ def main(argv):
                 offset = line.index(tokens[2])
                 query_seq.addTranslation(previous_line[offset:])
             elif re.match("^V", line):
-                if seq is None:
-                    seq = Sequence(tokens[5], tokens[4], tokens[6], tokens[3])
-                    align_record.add_v_alignment(seq, astart)
+                if vseq is None:
+                    vseq = Sequence(tokens[5], tokens[4], tokens[6], tokens[3])
+                    align_record.add_v_alignment(vseq, astart)
                 else:
-                    seq.addSequence(tokens[5], tokens[4], tokens[6])    
+                    vseq.addSequence(tokens[5], tokens[4], tokens[6])    
             elif re.match("^J", line):
                 if jseq is None:
                     jseq = Sequence(tokens[5], tokens[4], tokens[6], tokens[3])
@@ -179,6 +184,16 @@ def main(argv):
                 else:
                     jseq.addSequence(tokens[5], tokens[4], tokens[6])    
         if extractAlign and line.startswith("Lambda"): 
+            # extract v gene alignment coverage
+            name = vseq.getName()
+            r1 = int(vseq.getRange()[0])
+            r2 = int(vseq.getRange()[1])
+            coverage.loc[(coverage["gene"]==name) & (coverage["position"]>=r1) & (coverage["position"]<=r2), "depth"] += 1
+            # extract j gene alignment coverage
+            name = jseq.getName()
+            r1 = int(jseq.getRange()[0])
+            r2 = int(jseq.getRange()[1])
+            coverage.loc[(coverage["gene"]==name) & (coverage["position"]>=r1) & (coverage["position"]<=r2), "depth"] += 1
             extractAlign=False
             
         # Cache previous line
@@ -186,7 +201,7 @@ def main(argv):
 
 
 def usage():
-    print 'python parseIgBlast.py [--fastq fastq_file] [--blast blastn_input_file] [--mutation mutation_info_outputfile] [--coverage coverage_report_file]'
+    print 'cat igblastn_outputfile.txt | python parseIgBlast.py [--fastq fastq_file] [--mutation mutation_info_outputfile] [--coverage coverage_report_file]'
 
 if __name__ == "__main__":
     main(sys.argv[1:])
