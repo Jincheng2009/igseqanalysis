@@ -185,15 +185,17 @@ def main(argv):
                     jseq.addSequence(tokens[5], tokens[4], tokens[6])    
         if extractAlign and line.startswith("Lambda"): 
             # extract v gene alignment coverage
-            name = vseq.getName()
-            r1 = int(vseq.getRange()[0])
-            r2 = int(vseq.getRange()[1])
-            coverage.loc[(coverage["gene"]==name) & (coverage["position"]>=r1) & (coverage["position"]<=r2), "depth"] += 1
+            if vseq is not None:
+                name = vseq.getName()
+                r1 = int(vseq.getRange()[0])
+                r2 = int(vseq.getRange()[1])
+                coverage.loc[(coverage["gene"]==name) & (coverage["position"]>=r1) & (coverage["position"]<=r2), "depth"] += 1
             # extract j gene alignment coverage
-            name = jseq.getName()
-            r1 = int(jseq.getRange()[0])
-            r2 = int(jseq.getRange()[1])
-            coverage.loc[(coverage["gene"]==name) & (coverage["position"]>=r1) & (coverage["position"]<=r2), "depth"] += 1
+            if jseq is not None:
+                name = jseq.getName()
+                r1 = int(jseq.getRange()[0])
+                r2 = int(jseq.getRange()[1])
+                coverage.loc[(coverage["gene"]==name) & (coverage["position"]>=r1) & (coverage["position"]<=r2), "depth"] += 1
             extractAlign=False
             
         # Cache previous line
