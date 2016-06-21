@@ -203,7 +203,7 @@ def main(argv):
 
     # Output the coverage report
     if extractCoverage:
-        coverage.to_csv(coverage_out)
+        coverage.to_csv(coverage_out, index=False)
 
 def usage():
     print 'cat igblastn_outputfile.txt | python parseIgBlast.py [--fastq fastq_file] [--mutation mutation_info_outputfile] [--coverage coverage_report_file]'
