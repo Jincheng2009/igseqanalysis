@@ -28,16 +28,10 @@ def main(argv):
         elif opt == "--blast":
             blastfile = arg
             readFromFile=True
-        elif opt == "--mutation":
-            fileout = arg
         elif opt == "--coverage":
             extractCoverage=True
             coverage_out = arg
-    
-    # fileout = open(fileout, "wb")
-    # writer = csv.writer(fileout)
-    # writer.writerow('id, germline, query_pos, ref_pos, query_base, ref_base, b3, b2, b1, a1, a2, a3, mismatch, length, gap, phred')
-
+            
     count = 0
     printNext = 0
     coverage = {}
@@ -49,17 +43,23 @@ def main(argv):
         filein = sys.stdin
 
     fastq_dict = {}
-    recordEnd=False
     extractGermline=False
     extractStrand=False
     extractAlign=False
     nafter=0
     previous_line=""
+    coverage_depth = {}
     
     if extractCoverage:
         coverage = pd.read_csv(germline_file, header=None)
         coverage.columns = ["gene","position","kabat"]
-        coverage["depth"] = 0
+        coverage = coverage.groupby("gene")["position"].max().to_frame()
+        coveragefile = open(coverage_out, 'wb')
+        for row in coverage.iterrows():
+            name = row[0]
+            size = int(row[1])
+            temp = [0] * size
+            coverage_depth[name] = temp  
                             
     if extractFastq and os.path.isfile(fastqfile):
         fastq_dict=SeqIO.index(fastqfile,"fastq")
@@ -73,7 +73,6 @@ def main(argv):
         if line.startswith("Query="):
             align_record=None
             inframe=True
-            recordEnd=False
             extractGermline=False
             extractStrand=False
             extractAlign=False
@@ -99,7 +98,6 @@ def main(argv):
         
         # End of one alignment result        
         if line.startswith("Effective search space used:"):
-            recordEnd=True
             if align_record is not None:
                 for record in align_record.getMutations():
                     outline = ""
@@ -154,7 +152,6 @@ def main(argv):
             align_record = Alignment(fastaid, query_length)
             query_seq = None
             vseq = None
-            dseq = None
             jseq = None
             astart = 0   
         if extractAlign:
@@ -189,13 +186,13 @@ def main(argv):
                 name = vseq.getName()
                 r1 = int(vseq.getRange()[0])
                 r2 = int(vseq.getRange()[1])
-                coverage.loc[(coverage["gene"]==name) & (coverage["position"]>=r1) & (coverage["position"]<=r2), "depth"] += 1
+                coverage_depth[name][r1 - 1 : r2] = map(lambda x : x + 1, coverage_depth[name][r1 - 1 : r2])
             # extract j gene alignment coverage
             if jseq is not None:
                 name = jseq.getName()
                 r1 = int(jseq.getRange()[0])
                 r2 = int(jseq.getRange()[1])
-                coverage.loc[(coverage["gene"]==name) & (coverage["position"]>=r1) & (coverage["position"]<=r2), "depth"] += 1
+                coverage_depth[name][r1 - 1 : r2] = map(lambda x : x + 1, coverage_depth[name][r1 - 1 : r2])
             extractAlign=False
             
         # Cache previous line
@@ -203,10 +200,13 @@ def main(argv):
 
     # Output the coverage report
     if extractCoverage:
-        coverage.to_csv(coverage_out, index=False)
+        for key in coverage_depth:
+            for idx in range(len(coverage_depth[key])):
+                coveragefile.write(key+","+str(idx + 1)+","+str(coverage_depth[key][idx])+"\n");
+        coveragefile.close()
 
 def usage():
-    print 'cat igblastn_outputfile.txt | python parseIgBlast.py [--fastq fastq_file] [--mutation mutation_info_outputfile] [--coverage coverage_report_file]'
+    print 'cat igblastn_outputfile.txt | python parseIgBlast.py [--fastq fastq_file] [--coverage coverage_report_file]'
 
 if __name__ == "__main__":
     main(sys.argv[1:])

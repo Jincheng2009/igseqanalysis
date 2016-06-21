@@ -31,6 +31,22 @@ codontable = {
 }
 
 
+def getNeighboringBases(seq, center, ahead, after):
+    ungapped_seq = seq.repalce("-","")
+    nlen = len(ungapped_seq)
+    ngap = seq[0:center].count("-")
+    adjust_center = center - ngap
+    start = adjust_center - ahead
+    end = adjust_center + after
+    if start < 0:
+        result = "-" * abs(start) + ungapped_seq[0:end]
+    elif end >= nlen:
+        result = ungapped_seq[start:(nlen - 1)] + "-" * (end - nlen + 1)
+    else:
+        result = ungapped_seq[start:(end + 1)]
+    return result    
+    
+
 class Alignment:
     
     def __init__(self, name, length):
