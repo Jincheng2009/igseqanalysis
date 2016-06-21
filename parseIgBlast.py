@@ -201,6 +201,9 @@ def main(argv):
         # Cache previous line
         previous_line = line    
 
+    # Output the coverage report
+    if extractCoverage:
+        coverage.to_csv(coverage_out)
 
 def usage():
     print 'cat igblastn_outputfile.txt | python parseIgBlast.py [--fastq fastq_file] [--mutation mutation_info_outputfile] [--coverage coverage_report_file]'
