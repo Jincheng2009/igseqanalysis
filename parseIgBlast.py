@@ -62,7 +62,8 @@ def main(argv):
             coverage_depth[name] = temp  
                             
     if extractFastq and os.path.isfile(fastqfile):
-        fastq_dict=SeqIO.index(fastqfile,"fastq")
+        handle = open(fastqfile, 'rU')
+        fastq_dict=SeqIO.index(handle,"fastq")
 
     for line in filein:
         ## Not trim the end when parsing the alignment section
