@@ -181,18 +181,19 @@ def main(argv):
                 else:
                     jseq.addSequence(tokens[5], tokens[4], tokens[6])    
         if extractAlign and line.startswith("Lambda"): 
-            # extract v gene alignment coverage
-            if vseq is not None:
-                name = vseq.getName()
-                r1 = int(vseq.getRange()[0])
-                r2 = int(vseq.getRange()[1])
-                coverage_depth[name][r1 - 1 : r2] = map(lambda x : x + 1, coverage_depth[name][r1 - 1 : r2])
-            # extract j gene alignment coverage
-            if jseq is not None:
-                name = jseq.getName()
-                r1 = int(jseq.getRange()[0])
-                r2 = int(jseq.getRange()[1])
-                coverage_depth[name][r1 - 1 : r2] = map(lambda x : x + 1, coverage_depth[name][r1 - 1 : r2])
+            if extractCoverage:
+                # extract v gene alignment coverage
+                if vseq is not None:
+                    name = vseq.getName()
+                    r1 = int(vseq.getRange()[0])
+                    r2 = int(vseq.getRange()[1])
+                    coverage_depth[name][r1 - 1 : r2] = map(lambda x : x + 1, coverage_depth[name][r1 - 1 : r2])
+                # extract j gene alignment coverage
+                if jseq is not None:
+                    name = jseq.getName()
+                    r1 = int(jseq.getRange()[0])
+                    r2 = int(jseq.getRange()[1])
+                    coverage_depth[name][r1 - 1 : r2] = map(lambda x : x + 1, coverage_depth[name][r1 - 1 : r2])
             extractAlign=False
             
         # Cache previous line
