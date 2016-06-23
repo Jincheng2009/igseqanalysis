@@ -103,9 +103,9 @@ def main(argv):
                         coverage_record[3] = vseq.getRange()[1]   
                     if align_record.get_j_sequence() is not None:
                         jseq = align_record.get_j_sequence()
-                        coverage_record[1] = jseq.getName()
-                        coverage_record[2] = jseq.getRange()[0]
-                        coverage_record[3] = jseq.getRange()[1]
+                        coverage_record[4] = jseq.getName()
+                        coverage_record[5] = jseq.getRange()[0]
+                        coverage_record[6] = jseq.getRange()[1]
                     coverage_writer.writerow(coverage_record)
         ## Extract germline genes
         if line.startswith("Sequences producing significant alignments"):
