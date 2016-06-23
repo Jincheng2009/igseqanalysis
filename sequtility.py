@@ -74,7 +74,7 @@ class Alignment:
         pad = "".join('-' for i in range(start))
         self.jseq.addPrefix(pad)
      
-    def getCurrentQuery(self):
+    def getQuery(self):
         return self.query   
         
     def printOut(self):

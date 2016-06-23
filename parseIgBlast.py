@@ -3,11 +3,9 @@ import re
 import os
 from Bio import SeqIO
 import getopt
-import pandas as pd
 from sequtility import Alignment
-from sequtility import Sequence 
-
-germline_file = "/home/wuji/tools/imgt/germline_kabat.csv"
+from sequtility import Sequence
+import csv 
 
 def main(argv):
     extractFastq=False
@@ -34,7 +32,6 @@ def main(argv):
             
     count = 0
     printNext = 0
-    coverage = {}
     strandPlus=True
     
     if readFromFile:
@@ -48,18 +45,10 @@ def main(argv):
     extractAlign=False
     nafter=0
     previous_line=""
-    coverage_depth = {}
     
     if extractCoverage:
-        coverage = pd.read_csv(germline_file, header=None)
-        coverage.columns = ["gene","position","kabat"]
-        coverage = coverage.groupby("gene")["position"].max().to_frame()
         coveragefile = open(coverage_out, 'wb')
-        for row in coverage.iterrows():
-            name = row[0]
-            size = int(row[1])
-            temp = [0] * size
-            coverage_depth[name] = temp  
+        coverage_writer = csv.writer(coveragefile)
                             
     if extractFastq and os.path.isfile(fastqfile):
         fastq_dict=SeqIO.index(fastqfile,"fastq")
@@ -77,11 +66,6 @@ def main(argv):
             extractStrand=False
             extractAlign=False
             nafter=0
-            vgene=""
-            jgene=""
-            dgene="" 
-            refs=[]
-            alns=[]
             fastaid=line[7:].split(' ')[0]
             quality=[]
             count += 1
@@ -96,7 +80,8 @@ def main(argv):
         if line.startswith("Length="):
             query_length = int(line[7:])
         
-        # End of one alignment result        
+        # End of one alignment result
+        # Write out alignment results        
         if line.startswith("Effective search space used:"):
             if align_record is not None:
                 for record in align_record.getMutations():
@@ -108,8 +93,20 @@ def main(argv):
                     for item in record:
                         outline = outline + "," + str(item)
                     outline = outline[1:] + "," + str(phred) + "\n"
-                    sys.stdout.write(outline)    
-    
+                    sys.stdout.write(outline)
+                if extractCoverage:
+                    coverage_record = [align_record.getQuery().getName(), "NA", -1, -1, "NA", -1, -1]
+                    if align_record.get_v_sequence() is not None:
+                        vseq = align_record.get_v_sequence()
+                        coverage_record[1] = vseq.getName()
+                        coverage_record[2] = vseq.getRange()[0]
+                        coverage_record[3] = vseq.getRange()[1]   
+                    if align_record.get_j_sequence() is not None:
+                        jseq = align_record.get_j_sequence()
+                        coverage_record[1] = jseq.getName()
+                        coverage_record[2] = jseq.getRange()[0]
+                        coverage_record[3] = jseq.getRange()[1]
+                    coverage_writer.writerow(coverage_record)
         ## Extract germline genes
         if line.startswith("Sequences producing significant alignments"):
             extractGermline=True
@@ -181,19 +178,6 @@ def main(argv):
                 else:
                     jseq.addSequence(tokens[5], tokens[4], tokens[6])    
         if extractAlign and line.startswith("Lambda"): 
-            if extractCoverage:
-                # extract v gene alignment coverage
-                if vseq is not None:
-                    name = vseq.getName()
-                    r1 = int(vseq.getRange()[0])
-                    r2 = int(vseq.getRange()[1])
-                    coverage_depth[name][r1 - 1 : r2] = map(lambda x : x + 1, coverage_depth[name][r1 - 1 : r2])
-                # extract j gene alignment coverage
-                if jseq is not None:
-                    name = jseq.getName()
-                    r1 = int(jseq.getRange()[0])
-                    r2 = int(jseq.getRange()[1])
-                    coverage_depth[name][r1 - 1 : r2] = map(lambda x : x + 1, coverage_depth[name][r1 - 1 : r2])
             extractAlign=False
             
         # Cache previous line
@@ -201,9 +185,6 @@ def main(argv):
 
     # Output the coverage report
     if extractCoverage:
-        for key in coverage_depth:
-            for idx in range(len(coverage_depth[key])):
-                coveragefile.write(key+","+str(idx + 1)+","+str(coverage_depth[key][idx])+"\n");
         coveragefile.close()
 
 def usage():
