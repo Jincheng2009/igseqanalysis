@@ -138,7 +138,9 @@ class Alignment:
                     ref_base = ref_seq[j]
                     query_base = query_seq[j]
                     query_position = query.getRange()[0] + query.getUngappedPosition(j)
-                    if query.getTranslation() is not None:
+                    aa="-"
+                    ref_aa="-"
+                    if query.getTranslation():
                         prot = query.getTranslation()
                         query_codon=""
                         ref_codon=""
@@ -153,12 +155,8 @@ class Alignment:
                             ref_codon = ref_base + ref_a1 + ref_a2
                         if query_codon in codontable:
                             aa = codontable[query_codon]
-                        else:
-                            aa = "-"
                         if ref_codon in codontable:
                             ref_aa =  codontable[ref_codon]
-                        else:
-                            ref_aa = "-"
                     if not query.isStrandPlus():
                         query_position = self.length - query_position + 1
                     record=[self.name, germline, query_position, ref_pos, query_base, ref_base, aa, ref_aa]
