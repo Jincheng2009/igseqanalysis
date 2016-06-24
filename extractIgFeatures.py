@@ -70,8 +70,6 @@ def main(argv):
         count_table = pd.concat([count_table, miss_table], axis=1, join='inner')
     
     count_table = count_table[full_cols]
-    cols_final = map(lambda g : "H" + g, full_cols)
-    count_table.columns = cols_final
     count_table = count_table.fillna(0)
     count_table['id'] = count_table.index
     
