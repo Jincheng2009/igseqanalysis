@@ -7,7 +7,7 @@ import numpy as np
 
 def main(argv):
     germline = pd.read_csv("/home/wuji/tools/imgt/germline_kabat.csv")
-    germline.columns = ['gene', 'position', 'label']
+    germline.columns = ['gene', 'family','position', 'label']
     append=False
     try:
         opts, args = getopt.getopt(argv,"ha", ["output=", "coverage="])
