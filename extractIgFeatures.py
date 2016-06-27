@@ -43,10 +43,9 @@ def main(argv):
     df = df.sort_values(by=['id','query_pos'])
     
     # 3. Get dataframe with number of mutation for each kabat number for each sequence
-    df_count = df[['id','label']]
-    df_count['count'] = 1
-    df_count = df_count.groupby(['id','label'])['count'].sum()
+    df_count = df.groupby(['id','label']).size()
     df_count = df_count.reset_index()
+    df_count.columns = ['id', 'label', 'count']
     
     # 3.temp Get the germline alignment length data
     #df_germline = df[['id','isotype','germline','length']].drop_duplicates()
@@ -73,28 +72,7 @@ def main(argv):
     count_table = count_table.fillna(0)
     count_table['id'] = count_table.index
     
-    # 5. Join kabat mutation table with sequence information
-    df1 = df[['id', 'germline']].drop_duplicates()
-    df1 = df1[df1['germline'].str.startswith("IGHV")]
-    df1.columns = ['id', 'vgene']
-    count_table = pd.merge(count_table, df1, on=['id'])
-    df1 = df[['id', 'germline']].drop_duplicates()
-    df1 = df1[df1['germline'].str.startswith("IGHJ")]
-    df1.columns = ['id', 'jgene']
-    count_table = pd.merge(count_table, df1, on=['id'])
-    gene_pattern = '(^IGHV\d{1,2}-\d{1,3}|^IGHJ\d{1,2})'
-    
-    def extractGeneName(x):
-        m = re.search(gene_pattern, x)
-        found = 'NA'        
-        if m:
-            found=m.group()
-        return found
-    
-    count_table['vgene'] = count_table['vgene'].map(lambda g : extractGeneName(g))
-    count_table['jgene'] = count_table['jgene'].map(lambda g : extractGeneName(g))
-    
-    # 6. Count number of sense and nonsense mutation
+    # 5. Count number of sense and nonsense mutation
     #     0 - nonsense
     #     1 - sense
     df2 = df[['id','query_aa','ref_aa','label']]
@@ -111,7 +89,7 @@ def main(argv):
     
     # 6. Output data into csv file
     if append:
-        count_table.to_csv(fileout, mode='a', index=False, header=True)
+        count_table.to_csv(fileout, mode='a', index=False, header=False)
     else:
         count_table.to_csv(fileout, index=False)
     
