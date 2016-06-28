@@ -144,7 +144,7 @@ for sample in samples:
         print sample["annotation"] + " does not have associated file for: " + key 
         continue
     file_in = datapath + sample[key]
-    fname=sample["sampleID"] + ".paired.CDR3HL.uc"
+    fname=sample["sampleID"] + ".paired.CDR3.HL.uc"
     file_out = datapath+cluster+fname
     clusterUnique(file_in, file_out, sample["sampleID"], 0, 43)
     sample["CDR3_HL_uc"] = cluster + fname
