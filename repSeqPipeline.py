@@ -137,56 +137,31 @@ for sample in samples:
     countUnique(file_in, file_out, sample["sampleID"])
     sample["paired_CDR3_count"] = CDR + fname
 
-# 6. Cluster paired CDR3 sequences by CDR.H3
+# 6. Cluster paired CDR3 sequences by CDR-H3:CDR-L3
 for sample in samples:
     key="paired_CDR3"
     if not sample.has_key(key):
         print sample["annotation"] + " does not have associated file for: " + key 
         continue
     file_in = datapath + sample[key]
-    fname=sample["sampleID"] + ".paired.CDR.H3.uc"
+    fname=sample["sampleID"] + ".paired.CDR3HL.uc"
     file_out = datapath+cluster+fname
-    clusterUnique(file_in, file_out, sample["sampleID"], 0, 25)
-    sample["CDR_H3_uc"] = cluster + fname
+    clusterUnique(file_in, file_out, sample["sampleID"], 0, 43)
+    sample["CDR3_HL_uc"] = cluster + fname
 
 # 7. Format cluster results
 for sample in samples:
-    key="CDR_H3_uc"
+    key="CDR3_HL_uc"
     if not sample.has_key(key):
         print sample["annotation"] + " does not have associated file for: " + key 
         continue
     file_in = datapath + sample[key]
-    fname=sample["sampleID"] + ".paired.CDR3.H3.cluster"
+    fname=sample["sampleID"] + ".paired.CDR3.HL.cluster"
     file_out = datapath+cluster+fname
     formatCluster(file_in, file_out)
-    sample["CDR_H3_cluster"] = cluster + fname
+    sample["CDR3_HL_cluster"] = cluster + fname
 
-
-# 8. Cluster paired CDR3 sequences by CDR.L3
-for sample in samples:
-    key="paired_CDR3"
-    if not sample.has_key(key):
-        print sample["annotation"] + " does not have associated file for: " + key 
-        continue
-    file_in = datapath + sample[key]
-    fname=sample["sampleID"] + ".paired.CDR.L3.uc"
-    file_out = datapath+cluster+fname
-    clusterUnique(file_in, file_out, sample["sampleID"], 26, 43)
-    sample["CDR_L3_uc"] = cluster + fname
-
-# 9. Format cluster results
-for sample in samples:
-    key="CDR_L3_uc"
-    if not sample.has_key(key):
-        print sample["annotation"] + " does not have associated file for: " + key 
-        continue
-    file_in = datapath + sample[key]
-    fname=sample["sampleID"] + ".paired.CDR3.L3.cluster"
-    file_out = datapath+cluster+fname
-    formatCluster(file_in, file_out)
-    sample["CDR_L3_cluster"] = cluster + fname
-
-# 10. Count unique CDR3 without pairing R1 and R2 by fasta ID
+# 8. Count unique CDR3 without pairing R1 and R2 by fasta ID
 for sample in samples:
     key="CDR3"
     if not sample.has_key(key):
@@ -198,7 +173,7 @@ for sample in samples:
     countUnique(file_in, file_out, sample["sampleID"])
     sample["CDR3_count"] = unpaired + fname
 
-# 11. Cluster unpaired CDR3 sequences
+# 9. Cluster unpaired CDR3 sequences
 for sample in samples:
     key="CDR3"
     if not sample.has_key(key):
@@ -216,7 +191,7 @@ for sample in samples:
     clusterUnique(file_in, file_out, sample["sampleID"], start, end)
     sample["unpaired_CDR3_uc"] = unpaired + fname
 
-# 12. Format cluster results
+# 10. Format cluster results
 for sample in samples:
     key="unpaired_CDR3_uc"
     if not sample.has_key(key):
@@ -228,7 +203,7 @@ for sample in samples:
     formatCluster(file_in, file_out)
     sample["unpaired_CDR3_cluster"] = unpaired + fname
 
-# 13. Get CDR3 with germline information
+# 11. Get CDR3 with germline information
 for sample in samples:
     key="CDR3"
     if not sample.has_key(key):
@@ -240,7 +215,7 @@ for sample in samples:
     extractGermlineCDRCount(file_in, file_out)
     sample["germline_CDR3_count"] = germline + fname
 
-# 14. Get paired CDR3 with heavy and light chain germline information
+# 12. Get paired CDR3 with heavy and light chain germline information
 for sample in samples:
     key="paired_CDR3"
     if not sample.has_key(key):
