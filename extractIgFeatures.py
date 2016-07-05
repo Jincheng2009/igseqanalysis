@@ -33,7 +33,7 @@ def main(argv):
     # 1. Remove mutation with "N"
     n1 = df.shape[0]
     df = df[df['query_base']!="N"]
-    df = df[df['phred']>=10]
+    df = df[df['phred']>=15]
     n2 = df.shape[0]
     print "removing " + str(n1 - n2) + " rows"
     df['germline'] = df['germline'].map(str.strip)
