@@ -91,8 +91,10 @@ def extractCDR3(file_in, file_out, atype):
     elif atype == "VL":
         start = 103
         end = 13
+    proc0 = subprocess.Popen(["grep", "--no-group-separator", "-A", "1", "-v", "-e", "FRAMESHIFT Possible", "-e", "^[ATCGN\\.]"], 
+                             stdin=data_input, stdout=subprocess.PIPE)
     proc1 = subprocess.Popen(["java", "-cp", deepseqpath, "uk.co.catplc.deepseq.analysis.TrimFasta", str(start), str(end)], 
-                             stdin=data_input, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                             stdin=proc0.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     proc2 = subprocess.Popen(["java", "-cp", deepseqpath, "uk.co.catplc.deepseq.analysis.FilterByFeature", "."], 
                               stdin=proc1.stdout, stdout=output, stderr=subprocess.PIPE)
     for line in proc1.stderr:
