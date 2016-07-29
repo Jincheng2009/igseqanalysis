@@ -87,6 +87,7 @@ def main(argv):
 	## PCR starts	
 	for ct in range(0,cycle):
 		newDict = {}
+		print("PCR Cycle: " + str(ct))
 		#for seq in seqDict:
 		newDict = replicateSeq(seqDict, erate)
 		for newSeq in newDict:
