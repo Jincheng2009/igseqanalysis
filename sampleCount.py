@@ -45,8 +45,7 @@ def main(argv):
     count_df = pd.read_table(inputfile, header=None)
     count_df.columns = ["seq", "count"]
     count_df = count_df.sort_values("count", ascending=False)
-    
-    count_df.head(10)
+
     total = sum(count_df["count"])
     count_df["frac"] = count_df["count"] / total
     
@@ -55,8 +54,11 @@ def main(argv):
     
     count_df["sample_count"] = 0
     
+    complete = 0.0
     for i in range(count_df.shape[0]):
-        print(i)
+        if float(i)/count_df.shape[0] > complete + 0.1:
+            complete = float(i)/count_df.shape[0]
+            print "{0:.0f}%".format(complete * 100)
         count_df.loc[i, "frac"] = float(count_df.loc[i, "count"]) / sum(count_df["count"][i:])
         rands = np.random.rand(int(nsample))
         nseq = sum(rands < count_df["frac"][i])
@@ -64,6 +66,7 @@ def main(argv):
         nsample = nsample - nseq
     
     sampled_df = count_df[count_df["sample_count"]>0][["seq", "sample_count"]]
+    sampled_df.sort_values("sample_count", ascending=False)
     sampled_df.to_csv(outputfile, sep="\t", header=False, index=False)    
 
 if __name__ == "__main__":
