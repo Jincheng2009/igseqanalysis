@@ -68,6 +68,7 @@ def main(argv):
     sampled_df = count_df[count_df["sample_count"]>0][["seq", "sample_count"]]
     sampled_df.sort_values("sample_count", ascending=False)
     sampled_df.to_csv(outputfile, sep="\t", header=False, index=False)    
-
+    print "{0:.0f}%".format(100)
+    
 if __name__ == "__main__":
     main(sys.argv[1:])
