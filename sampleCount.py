@@ -40,7 +40,7 @@ def main(argv):
         elif opt in ("-s"):
             seed = int(arg)
             np.random.seed(seed)
-    sys.stderr.write('Sample size is ' + str(nsample))
+    sys.stderr.write('\nSample size is ' + str(nsample) + "\n")
 
     if inputfile is not None:
         count_df = pd.read_table(inputfile, header=None)
@@ -54,7 +54,7 @@ def main(argv):
     count_df["frac"] = count_df["count"] / total
     
     if nsample > total:
-        sys.stderr.write("sample size is larger than total size")
+        sys.stderr.write("sample size is larger than total size\n")
     
     count_df["sample_count"] = 0
     
@@ -75,7 +75,7 @@ def main(argv):
         sampled_df.to_csv(outputfile, sep="\t", header=False, index=False)
     else:
         sampled_df.to_csv(sys.stdout, sep="\t", header=False, index=False)   
-    sys.stderr.write("{0:.0f}%".format(100))
+    sys.stderr.write("{0:.0f}%".format(100) + "\n")
     
 if __name__ == "__main__":
     main(sys.argv[1:])
