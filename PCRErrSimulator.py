@@ -51,10 +51,10 @@ def main(argv):
 			random.seed(seed)
 		elif opt in ("-d"):
 			showDiff=True	
-	print 'Input file is ', inputfile
-	print 'Output file is ', outputfile
-	print 'Error rate is ', erate
-	print 'PCR cycle is ', cycle
+	sys.stderr.write('Input file is ', inputfile)
+	sys.stderr.write('Output file is ', outputfile)
+	sys.stderr.write('Error rate is ', erate)
+	sys.stderr.write('PCR cycle is ', cycle)
 
 	if inputfile is not None:
 		fp = open(inputfile)
@@ -93,7 +93,7 @@ def main(argv):
 	## PCR starts	
 	for ct in range(0,cycle):
 		newDict = {}
-		print("PCR Cycle: " + str(ct))
+		sys.stderr.write("PCR Cycle: " + str(ct))
 		#for seq in seqDict:
 		newDict = replicateSeq(seqDict, erate)
 		for newSeq in newDict:
