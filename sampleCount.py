@@ -20,6 +20,8 @@ def usage():
 
 
 def main(argv):
+    inputfile=None
+    outputfile=None
     try:
         opts, args = getopt.getopt(argv,"hdxi:o:m:s:",["ifile=","ofile="])
     except getopt.GetoptError:
@@ -42,7 +44,11 @@ def main(argv):
     print 'Output file is ', outputfile
     print 'Sample size is ', str(nsample)
 
-    count_df = pd.read_table(inputfile, header=None)
+    if inputfile is not None:
+        count_df = pd.read_table(inputfile, header=None)
+    else:
+        count_df = pd.read_table(sys.stdin, header=None)
+        
     count_df.columns = ["seq", "count"]
     count_df = count_df.sort_values("count", ascending=False)
 
@@ -67,8 +73,11 @@ def main(argv):
     
     sampled_df = count_df[count_df["sample_count"]>0][["seq", "sample_count"]]
     sampled_df.sort_values("sample_count", ascending=False)
-    sampled_df.to_csv(outputfile, sep="\t", header=False, index=False)    
-    print "{0:.0f}%".format(100)
+    if outputfile is not None:
+        sampled_df.to_csv(outputfile, sep="\t", header=False, index=False)
+    else:
+        sampled_df.to_csv(sys.stdout, sep="\t", header=False, index=False)   
+    sys.stderr.write("{0:.0f}%".format(100))
     
 if __name__ == "__main__":
     main(sys.argv[1:])

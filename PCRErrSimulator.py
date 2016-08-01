@@ -27,6 +27,8 @@ def usage():
 
 def main(argv):
 	showDiff=False
+	inputfile=None
+	outputfile=None
 	try:
 		opts, args = getopt.getopt(argv,"hdi:o:e:c:s:",["ifile=","ofile="])
 	except getopt.GetoptError:
@@ -54,19 +56,23 @@ def main(argv):
 	print 'Error rate is ', erate
 	print 'PCR cycle is ', cycle
 
-	with open(inputfile) as fp:
-		for line in fp:
-			line = line.rstrip()
-			if line.startswith(">"):
-				nameList.append(line)
+	if inputfile is not None:
+		fp = open(inputfile)
+	else:
+		fp = sys.stdin
+		
+	for line in fp:
+		line = line.rstrip()
+		if line.startswith(">"):
+			nameList.append(line)
+		else:
+			# If sequence exists in the dict, just add the count by 1
+			if line in seqDict:
+				seqDict[line] += 1
+			# If sequence does not exist in the dict, create a new entry with value = 1
 			else:
-				# If sequence exists in the dict, just add the count by 1
-				if line in seqDict:
-					seqDict[line] += 1
-				# If sequence does not exist in the dict, create a new entry with value = 1
-				else:
-					seqDict[line] = 1
-					n = len(line)
+				seqDict[line] = 1
+				n = len(line)
 
 	############################################################
 	## Calculate cumulative probability function of how many 
@@ -99,7 +105,11 @@ def main(argv):
 
 	############################################################
 	## Print out the results in descending count order
-	out = open(outputfile,'w')
+	if outputfile is not None:
+		out = open(outputfile,'w')
+	else:
+		out = sys.stdout
+		
 	first=True
 
 	for seq in sorted(seqDict, key=seqDict.get, reverse=True):
