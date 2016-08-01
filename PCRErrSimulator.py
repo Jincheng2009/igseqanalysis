@@ -51,10 +51,10 @@ def main(argv):
 			random.seed(seed)
 		elif opt in ("-d"):
 			showDiff=True	
-	sys.stderr.write('Input file is ', inputfile)
-	sys.stderr.write('Output file is ', outputfile)
-	sys.stderr.write('Error rate is ', erate)
-	sys.stderr.write('PCR cycle is ', cycle)
+	sys.stderr.write('Input file is ' + inputfile)
+	sys.stderr.write('Output file is ' + outputfile)
+	sys.stderr.write('Error rate is ' + erate)
+	sys.stderr.write('PCR cycle is '+ cycle)
 
 	if inputfile is not None:
 		fp = open(inputfile)
