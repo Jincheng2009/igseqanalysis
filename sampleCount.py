@@ -62,7 +62,7 @@ def main(argv):
     for i in range(count_df.shape[0]):
         if float(i)/count_df.shape[0] > complete + 0.1:
             complete = float(i)/count_df.shape[0]
-            sys.stderr.write("{0:.0f}%".format(complete * 100))
+            sys.stderr.write("{0:.0f}%".format(complete * 100) + "\n")
         count_df.loc[i, "frac"] = float(count_df.loc[i, "count"]) / sum(count_df["count"][i:])
         rands = np.random.rand(int(nsample))
         nseq = sum(rands < count_df["frac"][i])
