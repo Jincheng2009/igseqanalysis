@@ -122,8 +122,9 @@ def main(argv):
 		else:
 			out.write(seq+'\t'+str(seqDict.get(seq))+'\n')
 
-	out.close()
-	print 'Simulation completes'
+	if outputfile is not None:
+		out.close()
+	sys.stderr.write('Simulation completes')
 
 def replicateSeq(seqDict, erate):
 	newSeqDict = {}
