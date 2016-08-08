@@ -1,91 +1,162 @@
 ---
 title: "VH-VL pairing evaluation for B-cell repertoire deep sequencing"
 author: "Jincheng Wu"
-date: "Apr 20th, 2016"
+date: "Aug 1st, 2016"
 output: html_document
 ---
 
 #### 1. Quality check for the dataset
 
-Data source: http://www.nature.com/nm/journal/v21/n1/full/nm.3743.html
 
-```{r quality check, cache=TRUE, echo=FALSE, warning=FALSE}
+```{r quality check, cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
 rm(list=ls())
 library(reshape2)
 library(gplots)
 library(plyr)
 library(rjson)
 library(rmarkdown)
+library(ggplot2)
+library(data.table)
 
 metafile <- "C:/Java/data/george2/metadata.json"
 datapath <- dirname(metafile)
-
 metadata <- fromJSON(file=metafile)
 
 meta.df <- c()
 name.vector <- names(metadata[[1]])
 for(record in metadata) {
-    temp <- c()
-    for(n in name.vector) {
-        temp <- c(temp, unlist(record[n]))
+  temp <- c()
+  for(n in name.vector) {
+    if(is.null(unlist(record[n]))) {
+      temp <- c(temp, "NA")
+    } else {
+      temp <- c(temp, unlist(record[n]))
     }
-    meta.df <- rbind(meta.df, temp)
+  }
+  meta.df <- rbind(meta.df, temp)
 }
+
 colnames(meta.df) <- name.vector
+rownames(meta.df) <- NULL
 meta.df <- data.frame(meta.df)
+
+for(i in 1:ncol(meta.df)) {
+  meta.df[,i] <- as.character(meta.df[,i])
+}
 
 cdr.count <- c()
 
 for(sample in metadata) {
     countfile <- paste(datapath, sample$CDR3_count, sep="/")
-    temp <- read.table(countfile)
+    temp <- fread(countfile, sep="\t")
     temp$sample <- sample$sampleID
     temp$region <- sample$region
     colnames(temp) <- c("CDR3", "count", "sample", "region")
     cluster.temp <- read.table(paste(datapath, sample$unpaired_CDR3_cluster, sep="/"), sep="\t")
     colnames(cluster.temp) <- c("CDR3","CDR3c", "count")
-    temp <- merge(temp, cluster.temp)
+    temp <- merge(temp, cluster.temp, by=c("CDR3", "count"))
     cdr.count <- rbind(cdr.count, temp)    
 }
 
 
-cdr.count <- ddply(cdr.count, .(sample,region,CDR3c), summarize, count=sum(count))
-total.count <- ddply(cdr.count, .(sample, region), summarize, total=sum(count))
-max.count <- ddply(cdr.count, .(sample, region), summarize, max=max(count))
+cdr.count <- cdr.count[,list(count=sum(count)), by=list(sample,region,CDR3c)]
+total.count <- cdr.count[, list(total=sum(count)), by=list(sample,region)]
+max.count <- cdr.count[, list(max=max(count)), by=list(sample,region)]
 max.count <- merge(max.count, cdr.count, by.x=c("sample","region","max"), by.y=c("sample","region","count"))
 
-total.count <- merge(total.count, max.count)
+total.count <- merge(total.count, max.count, by=intersect(colnames(max.count), colnames(total.count)))
 total.count$fraction <- round(total.count$max/ total.count$total, 3)
 total.count <- merge(total.count, meta.df[,c("sampleID", "basename", "region")], 
                      by.x=c("sample", "region"), by.y=c("sampleID","region"))
 total.count <- total.count[order(total.count$region),]
-sample.count <- total.count[,c("sample", "region", "total")]
-sample.count <- acast(sample.count, sample ~ region)
+sample.count <- total.count[, list(sample,region,total)]
+sample.count <- acast(sample.count, sample ~ region, value.var="total")
 ```
 
 The valid sequence number of each sample is listed as follow:
 `r knitr::kable(sample.count)`
 
 The highest count sequence in each sample and its fraction.
-```{r, echo=FALSE}
-total.count[,c(1:6)]
+```{r highest_count, echo=FALSE}
+data.frame(total.count)[, seq(1,6)]
 ```
-
 #### 2. CDR-H3 diversity
 Next, we evaluated the diversity of library generated in each sample using CDR-H3 as the indicator of diversity.
 
-```{r diversity, echo=FALSE}
+```{r CDR_H3_diversity, echo=FALSE}
 library(plyr)
 cdr.h3.cluster <- subset(cdr.count, region=="VH")
 cdr.h3.count <- count(cdr.h3.cluster, vars=c("sample","region"))
 count_no_single <- count(subset(cdr.h3.cluster, count>1), vars=c("sample","region"))
 cdr.h3.count <- rename(cdr.h3.count, c("freq"="unique count"))
 count_no_single <- rename(count_no_single, c("freq"="unique count (singleton excluded)"))
-cdr.h3.count <- merge(cdr.h3.count, count_no_single)
-info <- total.count[,c(1,2,3,7)]
-cdr.h3.count <- merge(cdr.h3.count, info)
+cdr.h3.count <- merge(cdr.h3.count, count_no_single, by=intersect(colnames(cdr.h3.count), colnames(count_no_single)))
+info <- total.count[,list(sample,region,total,basename)]
+cdr.h3.count <- merge(cdr.h3.count, info, by=intersect(colnames(cdr.h3.count), colnames(info)))
 ```
 `r knitr::kable(cdr.h3.count)`
+
+#### 3. CDR-H3 and CDR-L3 diversity
+
+```{r CDR_HL3_diversity, echo=FALSE, cache=TRUE, message=FALSE}
+sample_info <- c()
+meta.df$sampleID <- as.character(meta.df$sampleID)
+for(sample in unique(meta.df$sampleID)) {
+    sample_info <- rbind(sample_info, c(sample, "", ""))
+}
+sample_info <- data.frame(sample_info, stringsAsFactors=FALSE)
+colnames(sample_info) <- c("sample", "h3_cluster","l3_cluster")
+
+paired.cdr.count <- c()
+for(i in 1:nrow(meta.df)) {
+    sample = meta.df[i,]
+    idx <- which(sample_info$sample==sample$sampleID)
+    if(sample_info[idx,]$h3_cluster == "" & sample$region == "VH") {
+        sample_info[idx,]$h3_cluster <- sample$unpaired_CDR3_cluster
+    }
+    else if(sample_info[idx,]$l3_cluster == "" & sample$region == "VL") {
+        sample_info[idx,]$l3_cluster <- sample$unpaired_CDR3_cluster
+    }
+    if (sample_info[idx,]$l3_cluster != "" & sample_info[idx,]$h3_cluster != "") {
+        countfile <- paste(datapath, sample$paired_CDR3_count, sep="/")
+        temp <- fread(countfile, sep="\t")
+        temp$sample <- sample$sampleID
+        colnames(temp) <- c("CDR3", "count", "sample")
+        temp$CDR3 <- as.character(temp$CDR3)
+        # Split CDR-H3 and CDR-L3
+        temp2 <- t(data.frame(sapply(temp$CDR3, function(x) strsplit(x, ":")[[1]])))
+        colnames(temp2) <- c("CDRh3", "CDRl3")
+        rownames(temp2) <- NULL
+        temp <- cbind(temp, temp2)
+        # Load clustering file
+        h3.temp <- fread(paste(datapath, sample_info[idx,]$h3_cluster, sep="/"), sep="\t")
+        h3.temp <- h3.temp[,list(V1,V2)]
+        colnames(h3.temp) <- c("CDRh3","CDRh3c")
+        l3.temp <- fread(paste(datapath, sample_info[idx,]$l3_cluster, sep="/"), sep="\t")
+        l3.temp <- l3.temp[,list(V1,V2)]
+        colnames(l3.temp) <- c("CDRl3","CDRl3c")
+        # Merge with clustered file
+        temp <- merge(temp, h3.temp, by=intersect(colnames(temp), colnames(h3.temp)))
+        temp <- merge(temp, l3.temp, by=intersect(colnames(temp), colnames(l3.temp)))
+        paired.cdr.count <- rbind(paired.cdr.count, temp)    
+    }
+}
+
+paired.cdr.cluster.count <- paired.cdr.count[, sum(count), by=c("sample", "CDRh3c", "CDRl3c")]
+colnames(paired.cdr.cluster.count) <- c("sample", "CDRh3c", "CDRl3c", "count")
+temp <- ddply(paired.cdr.cluster.count, .(sample), summarize, total=sum(count))
+count_no_single <- count(subset(paired.cdr.cluster.count, count > 1)$sample)
+colnames(count_no_single) <- c("sample", "unique count (singleton excluded)")
+cdr.hl3.count <- count(paired.cdr.cluster.count$sample)
+colnames(cdr.hl3.count) <- c("sample", "unique count")
+cdr.hl3.count <- merge(cdr.hl3.count, count_no_single)
+cdr.hl3.count <- merge(cdr.hl3.count, temp)
+
+info <- meta.df[, c("sampleID", "donor", "protocol")]
+info <- info[!duplicated(info),]
+cdr.hl3.count <- merge(cdr.hl3.count, info, by.x="sample", by.y="sampleID")
+```
+`r knitr::kable(cdr.hl3.count)`
 
 ```{r processing count df, echo=FALSE, warning=FALSE, results="hide", eval=FALSE}
 library(reshape2)
@@ -103,7 +174,7 @@ write.csv(cdr.h3.table, count.file, quote=FALSE)
 ```
 
 
-#### 3. VH-VL pairing evaluation
+#### 4. VH-VL pairing evaluation
 We further analyze the VH-VL pairing quality using two metrics: (1) Number of unique CDR-L3 pairs of a unique CDR-H3 and (2) Top weight of CDR-L3 pairs of a unique CDR-H3
 
 
@@ -115,80 +186,69 @@ library(rjson)
 library(rmarkdown)
 
 ##############################################################################
-### Data loading for unclustered data analysis
+### Data loading for clustered data analysis
 ##############################################################################
 
-loadpairedCDR <- function(metafile, batch, key="paired_CDR3_count") {
-    datapath <- dirname(metafile)
-    metadata <- fromJSON(file=metafile)
-    
+loadpairedCDRcluster <- function(metadata, chain) {
     t <- c()
     samples <- c()
     
     for(sample in metadata) {
         if(sample$sampleID %in% samples)
             next
-        if(! key %in% names(sample))
+        file1 = sample$paired_CDR3_count 
+        filein = paste(datapath, file1, sep="/")
+        if(!file.exists(filein)) {
+            print(filein)
             next
-        filein=paste(datapath,sample[key], sep="/")
-        sampleData <- read.table(filein, header = F, nrows = 5)
-        classes <- sapply(sampleData, class)
-        classes[grep("factor",classes)]="character"
-        temp <- read.table(filein, header=F, colClass=classes)
-        colnames(temp) <- c("CDR3","count")
-        temp$CDR.H3 <- sapply(temp$CDR3, function(x) strsplit(as.character(x), ":")[[1]][1])
-        temp$CDR.L3 <- sapply(temp$CDR3, function(x) strsplit(as.character(x), ":")[[1]][2])
+        }
+        temp <- fread(filein, sep="\t")
+        colnames(temp) <- c("CDR3", "count")
+        temp$CDR.H3 <- sapply(temp$CDR3, function(x) strsplit(x, ":")[[1]][1])
+        temp$CDR.L3 <- sapply(temp$CDR3, function(x) strsplit(x, ":")[[1]][2])
         samples <-c(samples,sample$sampleID)
         temp$sample <- sample$sampleID
         temp$time <- sample$time
         temp$protocol <- sample$protocol
         temp$donor <- sample$donor
+        temp <- temp[,CDR3:=NULL]
+        
+        if(chain == "VL") {
+            filein <- paste(datapath, sample_info[sample_info$sample==sample$sampleID,]$l3_cluster, sep="/")
+            if(!file.exists(filein)) {
+              print(paste(filein, "does not exists"))
+              next
+            }
+            temp.cluster <- fread(filein, sep="\t")
+            colnames(temp.cluster) <- c("CDR.L3", "CDR3.parent", "count")
+            temp.cluster <- temp.cluster[,list(CDR.L3, CDR3.parent)]
+            temp <- merge(temp, temp.cluster, by=intersect(colnames(temp), colnames(temp.cluster)))
+            temp$CDR.L3 <- temp$CDR3.parent
+        }
+        
+        if(chain == "VH") {
+            filein <- paste(datapath, sample_info[sample_info$sample==sample$sampleID,]$h3_cluster, sep="/")
+            if(!file.exists(filein)) {
+              print(paste(filein, "does not exists"))
+              next
+            }
+            temp.cluster <- fread(filein, sep="\t")
+            colnames(temp.cluster) <- c("CDR.H3", "CDR3.parent", "count")
+            temp.cluster <- temp.cluster[,list(CDR.H3, CDR3.parent)]
+            temp <- merge(temp, temp.cluster, by=intersect(colnames(temp), colnames(temp.cluster)))
+            temp$CDR.H3 <- temp$CDR3.parent
+        } 
+        # Remove CDR3 parent column
+        temp <- temp[,CDR3.parent:=NULL]
+        # Aggregate
+        temp <- temp[, list(count=sum(count)) ,list(CDR.H3, CDR.L3, sample, time, protocol, donor)]
         t <- rbind(t, temp)
     }
-    t$batch=batch
     t
 }
 
-
-##############################################################################
-### Data loading for clustered data analysis
-##############################################################################
-
-loadpairedCDRcluster <- function(metafile, batch) {
-  datapath <- dirname(metafile)
-  metadata <- fromJSON(file=metafile)
-  
-  t <- c()
-  samples <- c()
-  
-  for(sample in metadata) {
-    if(sample$sampleID %in% samples)
-      next
-    filein = paste(datapath,sample$CDR_L3_cluster, sep="/")
-    sampleData <- read.table(filein, header = F, nrows = 5)
-    classes <- sapply(sampleData, class)
-    classes[grep("factor",classes)]="character"
-    temp <- read.table(filein, header=F, colClass=classes)
-    colnames(temp) <- c("CDR3","parentCDR3","count")
-    temp$CDR.H3 <- sapply(temp$CDR3, function(x) strsplit(x, ":")[[1]][1])
-    #temp$CDR.L3 <- sapply(temp$CDR3, function(x) strsplit(x, ":")[[1]][2])
-    #temp$CDR.H3 <- sapply(temp$parentCDR3, function(x) strsplit(x, ":")[[1]][1])
-    temp$CDR.L3 <- sapply(temp$parentCDR3, function(x) strsplit(x, ":")[[1]][2])
-    samples <-c(samples,sample$sampleID)
-    temp$sample <- sample$sampleID
-    temp$time <- sample$time
-    temp$protocol <- sample$protocol
-    temp$donor <- sample$donor
-    temp <- temp[,c(-1,-2)]
-    t <- rbind(t, temp)
-  }
-  t$batch=batch
-  t
-}
-
-# data <- loadpairedCDR(metafile, 1)
-data.cluster <- loadpairedCDRcluster(metafile, 1)
-
+data.clusterVL <- loadpairedCDRcluster(metadata, "VL")
+data.clusterVH <- loadpairedCDRcluster(metadata, "VH")
 ```
 
 ```{r, echo=FALSE, cache=TRUE}
@@ -196,50 +256,60 @@ library(plyr)
 ##############################################################################
 ### Function to process the data
 ##############################################################################
-countPairStat <- function(input) {
+countPairStat <- function(input, chain="VH") {
     label_vector <- apply(input, 1, function(x) 
-        if(x['batch']!=3) {
-          paste(x['donor'], x['protocol'], sep="_")
-        }
-        else {
-          paste(x['donor'], x['protocol'], sep="_")
-        }
+      paste(x['donor'], x['protocol'], x['time'], sep="_")
     )
-
-    input$label <- label_vector
     
-    input <- ddply(input, .(CDR.H3, CDR.L3, label), function (x) sum(x$count) )
-    input <- rename(input, c("V1"="count"))
+    input$label <- label_vector
+    input <- input[,list(count=sum(count)), list(CDR.H3, CDR.L3, label)]
     ##############################################################################
     ### Data processing: Calculating the weight of top pair
     ##############################################################################
-    CDR.H3.pair.sum <- ddply(input, .(CDR.H3, label), function (x) sum(x$count) )
-    CDR.H3.pair.top <- ddply(input, .(CDR.H3, label), function (x) max(x$count) )
+    if(chain=="VH") {
+        CDR3.pair.sum <- input[,list(total=sum(count)), list(CDR.H3, label)] 
+        CDR3.pair.top <- input[,list(top=max(count)), list(CDR.H3, label)]
+    } else if(chain=="VL") {
+        CDR3.pair.sum <- input[,list(total=sum(count)), list(CDR.L3, label)]
+        CDR3.pair.top <- input[,list(top=max(count)), list(CDR.L3, label)]
+    } else {
+        stop("Unknown chain type")
+    }
     
-    CDR.H3.pair.fraction <- cbind(CDR.H3.pair.sum, CDR.H3.pair.top[,ncol(CDR.H3.pair.top)])
-    colnames(CDR.H3.pair.fraction) <- c("CDR.H3", "label", "total", "top")
+    CDR3.pair.fraction <- cbind(CDR3.pair.sum, CDR3.pair.top[, list(top)])
+    colnames(CDR3.pair.fraction) <- c("CDR3", "label", "total", "top")
     
-    CDR.H3.pair.fraction$fraction <- CDR.H3.pair.fraction$top/CDR.H3.pair.fraction$total
+    CDR3.pair.fraction$fraction <- CDR3.pair.fraction$top/CDR3.pair.fraction$total
     
     ##############################################################################
     ### Data processing: Counting number of pairs
     ##############################################################################
+    if(chain =="VH") {
+      input2 <- rename(input, c("CDR.H3" = "CDR3"))
+    } else if(chain == "VL") {
+      input2 <- rename(input, c("CDR.L3" = "CDR3"))
+    }
+    CDR3.pair.count <- count(input2, c("CDR3","label"))
     
-    CDR.H3.pair.count <- count(input, c("CDR.H3","label"))
+    CDR3.pair.count <- merge(CDR3.pair.count, CDR3.pair.fraction, 
+                             by=intersect(colnames(CDR3.pair.count), colnames(CDR3.pair.fraction)))
     
-    CDR.H3.pair.count <- merge(CDR.H3.pair.count, CDR.H3.pair.fraction)
+    if(chain == "VH") {
+      CDR3.pair.count <- rename(CDR3.pair.count, c("CDR3" = "CDR.H3"))
+    } else if(chain == "VL") {
+      CDR3.pair.count <- rename(CDR3.pair.count, c("CDR3" = "CDR.L3"))
+    }
     
-    CDR.H3.pair.count
+    CDR3.pair.count
 }
 
-# data.filter <- data[data$count>1,]
-# CDR.H3.pair.count <- countPairStat(data.filter)
-cluster.CDR.H3.pair.count <- countPairStat(data.cluster[data.cluster$count>1,])
+cluster.CDR.H3.pair.count <- countPairStat(data.clusterVL[data.clusterVL$count>1,], "VH")
+cluster.CDR.L3.pair.count <- countPairStat(data.clusterVH[data.clusterVH$count>1,], "VL")
 ```
 
 The details of each sample is listed in the table below:
 ``` {r, echo=FALSE}
-info <- unique(data.cluster[,c("sample","protocol","donor")])
+info <- unique(data.clusterVL[,list(sample,protocol,donor)])
 rownames(info) <- c()
 info
 ```
@@ -261,15 +331,15 @@ library(ggplot2)
 plotPairCount <- function(input, title, type="violin") {
     maxlog = as.integer(log10(max(input$freq))) + 1
     if(maxlog < 2) {
-        maxlog = 2
+      maxlog = 2
     }
     maxlog = 3
     breaks = 10 ** (0:maxlog)
     if(type=="violin") {
-        vp <- ggplot(input, aes(x = label, y = freq)) + geom_violin()
+      vp <- ggplot(input, aes(x = label, y = freq)) + geom_violin()
     }
     else if(type=="boxplot") {
-        vp <- ggplot(input, aes(x = label, y = freq)) + geom_boxplot()
+      vp <- ggplot(input, aes(x = label, y = freq)) + geom_boxplot()
     }
     vp <- vp + theme(axis.text.x = element_text(size = rel(1.0), angle = 00))   + xlab("")
     vp <- vp + scale_y_log10(breaks = breaks) + ylab("Pair number")
@@ -279,10 +349,10 @@ plotPairCount <- function(input, title, type="violin") {
 
 plotTopWeight <- function(input, title, type="violin") {
     if(type=="violin") {
-        vp <- ggplot(input, aes(x = label, y = fraction)) + geom_violin()
+      vp <- ggplot(input, aes(x = label, y = fraction)) + geom_violin()
     }
     else if(type=="boxplot") {
-        vp <- ggplot(input, aes(x = label, y = fraction)) + geom_boxplot()
+      vp <- ggplot(input, aes(x = label, y = fraction)) + geom_boxplot()
     }
     vp <- vp + theme(axis.text.x = element_text(size = rel(1.0), angle = 00))  
     vp <- vp + ylim(0, 1) + xlab("") + ylab("Top pair weight")
@@ -292,7 +362,9 @@ plotTopWeight <- function(input, title, type="violin") {
 ```
 
 
-#### Summary Table for pair number and top pair weight (clustered sequence count > 10)
+#### Summary Table for VH pair number and top pair weight (clustered sequence count > 10)
+Number of VL CDR3 paired to the same VH CDR3
+
 ```{r, echo=FALSE}
 library(plyr)
 t1 <- ddply(subset(cluster.CDR.H3.pair.count, total>10), .(label), function (x) summary(x$freq))
@@ -303,36 +375,48 @@ t2 <- rename(t2, c("label"="Top pair weight"))
 `r knitr::kable(t1)`
 `r knitr::kable(t2)`
 
-#### Visualization for clustered sequences
+#### Visualization for VL clustered sequences
 
 ```{r visualization3, echo=FALSE, warning=TRUE}
 library(grid)
 library(gridExtra)
-# fig1.1 <- plotPairCount(subset(cluster.CDR.H3.pair.count, total<10), "Violin", "violin");
-# fig1.2 <- plotPairCount(subset(cluster.CDR.H3.pair.count, total<10), "Boxplot", "boxplot");
-# grid.arrange(fig1.1, fig1.2, ncol = 2, top = "CDR.H3 Cluster Count 1-10")
-# 
-# fig2.1 <- plotPairCount(subset(cluster.CDR.H3.pair.count, total>10 & total<=100), "Violin", "violin");
-# fig2.2 <- plotPairCount(subset(cluster.CDR.H3.pair.count, total>10 & total<=100), "Boxplot", "boxplot");
-# grid.arrange(fig2.1, fig2.2, ncol = 2, top = "CDR.H3 Cluster Count 10-100")
   
-fig3.1 <- plotPairCount(subset(cluster.CDR.H3.pair.count, total>10), "Violin", "violin");
-fig3.2 <- plotPairCount(subset(cluster.CDR.H3.pair.count, total>10), "Boxplot", "boxplot");
-grid.arrange(fig3.1, fig3.2, ncol = 2, top = "All CDR.H3 Cluster Count > 10")
+fig1.1 <- plotPairCount(subset(cluster.CDR.H3.pair.count, total>10), "Violin", "violin");
+fig1.2 <- plotPairCount(subset(cluster.CDR.H3.pair.count, total>10), "Boxplot", "boxplot");
+grid.arrange(fig1.1, fig1.2, ncol = 2, top = "All CDR.H3 Cluster Count > 10")
 
-# fig4.1 <- plotTopWeight(subset(cluster.CDR.H3.pair.count, total<10), "Violin", "violin");
-# fig4.2 <- plotTopWeight(subset(cluster.CDR.H3.pair.count, total<10), "Boxplot", "boxplot");
-# grid.arrange(fig4.1, fig4.2, ncol = 2, top = "CDR.H3 Cluster Count 1-10")
-# 
-# fig5.1 <- plotTopWeight(subset(cluster.CDR.H3.pair.count, total>10 & total<=100), "Violin", "violin");
-# fig5.2 <- plotTopWeight(subset(cluster.CDR.H3.pair.count, total>10 & total<=100), "Boxplot", "boxplot");
-# grid.arrange(fig5.1, fig5.2, ncol = 2, top = "CDR.H3 Cluster Count 10-100")
 
-fig6.1 <- plotTopWeight(subset(cluster.CDR.H3.pair.count, total>10), "Violin", "violin");
-fig6.2 <- plotTopWeight(subset(cluster.CDR.H3.pair.count, total>10), "Boxplot", "boxplot");
-grid.arrange(fig6.1, fig6.2, ncol = 2, top = "All CDR.H3 Cluster Count > 10")
-
+fig2.1 <- plotTopWeight(subset(cluster.CDR.H3.pair.count, total>10), "Violin", "violin");
+fig2.2 <- plotTopWeight(subset(cluster.CDR.H3.pair.count, total>10), "Boxplot", "boxplot");
+grid.arrange(fig2.1, fig2.2, ncol = 2, top = "All CDR.H3 Cluster Count > 10")
 ```
 
+#### Summary Table for VL pair number and top pair weight (clustered sequence count > 10)
+Number of VH CDR3 paired to the same VL CDR3
 
+```{r, echo=FALSE}
+library(plyr)
+t3 <- ddply(subset(cluster.CDR.L3.pair.count, total>10), .(label), function (x) summary(x$freq))
+t3 <- rename(t3, c("label"="Pair number"))
+t4 <- ddply(subset(cluster.CDR.L3.pair.count, total>10), .(label), function (x) summary(x$fraction))
+t4 <- rename(t4, c("label"="Top pair weight"))
+```
+`r knitr::kable(t3)`
+`r knitr::kable(t4)`
+
+#### Visualization for VH clustered sequences
+
+```{r visualization4, echo=FALSE, warning=TRUE}
+library(grid)
+library(gridExtra)
+  
+fig3.1 <- plotPairCount(subset(cluster.CDR.L3.pair.count, total>10), "Violin", "violin");
+fig3.2 <- plotPairCount(subset(cluster.CDR.L3.pair.count, total>10), "Boxplot", "boxplot");
+grid.arrange(fig3.1, fig3.2, ncol = 2, top = "All CDR.L3 Cluster Count > 10")
+
+
+fig4.1 <- plotTopWeight(subset(cluster.CDR.L3.pair.count, total>10), "Violin", "violin");
+fig4.2 <- plotTopWeight(subset(cluster.CDR.L3.pair.count, total>10), "Boxplot", "boxplot");
+grid.arrange(fig4.1, fig4.2, ncol = 2, top = "All CDR.L3 Cluster Count > 10")
+```
 
