@@ -103,7 +103,7 @@ def main(argv):
 				seqDict[newSeq] = newDict[newSeq]
 		if sum(seqDict.itervalues()) > 1e8:
 			# If size is larger than 100 million, down-sample half
-			for seq in seqDict:
+			for seq in seqDict.keys():
 				count = seqDict[seq]
 				count = numpy.random.binomial(count, 0.5)
 				if count == 0:
