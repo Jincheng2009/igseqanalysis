@@ -6,6 +6,7 @@
 import sys, getopt
 import random
 import math
+import numpy
 
 nameList=[]
 seqDict={}
@@ -99,7 +100,16 @@ def main(argv):
 				seqDict[newSeq] += newDict[newSeq]
 			# If sequence does not exist in the dict, create a new entry with value = 1
 			else:
-				seqDict[newSeq] = newDict[newSeq]			
+				seqDict[newSeq] = newDict[newSeq]
+		if sum(seqDict.itervalues()) > 1e8:
+			# If size is larger than 100 million, down-sample half
+			for seq in seqDict:
+				count = seqDict[seq]
+				count = numpy.random.binomial(count, 0.5)
+				if count == 0:
+					seqDict.pop(seq, None)
+				else:
+					seqDict[seq]=count						
 
 	############################################################
 	## Print out the results in descending count order
