@@ -25,6 +25,7 @@ def usage():
 def main(argv):
     extractFastq=False
     extractCoverage=False
+    extractID=False
     readFromFile=False
     analysisType = ""
     try:
@@ -87,6 +88,7 @@ def main(argv):
             line=line.rstrip()
         # line=line.strip()
         if line.startswith("Query="):
+            extractID=True
             align_record=None
             inframe=True
             extractGermline=False
@@ -104,7 +106,12 @@ def main(argv):
                 sys.stderr.write("Processed: " + str(count) + "\n")
                 printNext = printNext + 10000
         
+        if extractID:
+            line = line.rstrip()
+            fastaid=fastaid + line
+        
         if line.startswith("Length="):
+            extractID=False
             query_length = int(line[7:])
         
         # End of one alignment result
