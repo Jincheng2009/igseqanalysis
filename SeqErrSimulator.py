@@ -49,9 +49,8 @@ def main(argv):
             showDiff=True
         elif opt in ("-x"):
             biasedSub=True    
-    print 'Input file is ', inputfile
-    print 'Output file is ', outputfile
-    print 'Error rate is ', erate
+
+    sys.stderr.write('Error rate is ' + str(erate))
 
     if inputfile is not None:
         fp = open(inputfile)
