@@ -122,8 +122,8 @@ def readSeq(seqDict, erate, biasedSub):
     newSeqDict = {}
     
 
-    for seq in seqDict:
-        count = seqDict.get(seq)
+    for seq in seqDict.keys():
+        count = seqDict[seq]
         good_read = 0
         n = len(seq)
         # Probability that this replication will not have error
@@ -134,8 +134,10 @@ def readSeq(seqDict, erate, biasedSub):
             # Error will happen when random number is less than p_Err
             if r1>p_Err:
                 good_read = good_read + 1
-
-        seqDict[seq] = good_read
+        if good_read == 0:
+            seqDict.pop(seq, None)
+        else:
+            seqDict[seq] = good_read
     
         for i in range(0,count - good_read):
             nErr = calcNumOfErr()
