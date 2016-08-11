@@ -88,7 +88,6 @@ def main(argv):
             line=line.rstrip()
         # line=line.strip()
         if line.startswith("Query="):
-            extractID=True
             align_record=None
             inframe=True
             extractGermline=False
@@ -113,7 +112,9 @@ def main(argv):
         if line.startswith("Length="):
             extractID=False
             query_length = int(line[7:])
-        
+
+        if line.startswith("Query="):        
+            extractID=True
         # End of one alignment result
         # Write out alignment results        
         if line.startswith("Effective search space used:"):
