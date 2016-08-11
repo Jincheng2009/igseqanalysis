@@ -106,7 +106,7 @@ def main(argv):
                 sys.stderr.write("Processed: " + str(count) + "\n")
                 printNext = printNext + 10000
         
-        if extractID:
+        if extractID and not line.startswith("Length="):
             line = line.rstrip()
             fastaid=fastaid + line
         
