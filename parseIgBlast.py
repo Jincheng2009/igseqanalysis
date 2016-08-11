@@ -7,12 +7,28 @@ from sequtility import Alignment
 from sequtility import Sequence
 import csv 
 
+MUTATION="mutation"
+CDR="CDR"
+
+def usage():
+    print 'Parse the output from IgBlastn to extract CDRs (CDR1, CDR2, CDR3), mutations and coverage'
+    print 'Support standard input and file input. Optional coverage output is written in a file specified by --coverage option'
+    print 'Annotation region or mutation is output into standard output'
+    print 'Use --type option to choose output type'
+    print 'cat igblastn_outputfile.txt | python parseIgBlast.py -t mutation [--fastq fastq_file] [--coverage coverage_report_file] > mutation.csv'
+    print '-b --blast\t input file from output of ncbi-igblast'
+    print '-f --fastq\t fastq file (optional to extract Phred score of mutation)'
+    print '-t --type \t Output type (mutation or CDR), output file is CSV format'
+    print '-c --coverage\t Outpufile (optional for coverage for each alignment)'
+
+    
 def main(argv):
     extractFastq=False
     extractCoverage=False
     readFromFile=False
+    analysisType = ""
     try:
-        opts, args = getopt.getopt(argv,"h", ["blast=","fastq=","mutation=","coverage="])
+        opts, args = getopt.getopt(argv,"hb:f:t:c:", ["blast=","fastq=","type=","coverage="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -20,15 +36,25 @@ def main(argv):
         if opt == "-h":
             usage()
             sys.exit()
-        elif opt == "--fastq":
+        elif opt in ("-f", "--fastq"):
             extractFastq=True
             fastqfile = arg
-        elif opt == "--blast":
+        elif opt in ("-b", "--blast"):
             blastfile = arg
             readFromFile=True
-        elif opt == "--coverage":
+        elif opt in ("c", "--coverage"):
             extractCoverage=True
             coverage_out = arg
+        elif opt in ("-t", "--type"):
+            if arg==MUTATION:
+                analysisType = MUTATION
+            elif arg==CDR:
+                analysisType = CDR
+            else:
+                sys.stdout.write("Only mutation and CDR analysis type are allowed \n")
+                usage()
+                sys.exit()
+                    
             
     count = 0
     printNext = 0
@@ -45,6 +71,7 @@ def main(argv):
     extractAlign=False
     nafter=0
     previous_line=""
+    previous_line2 = ""
     
     if extractCoverage:
         coveragefile = open(coverage_out, 'wb')
@@ -84,16 +111,23 @@ def main(argv):
         # Write out alignment results        
         if line.startswith("Effective search space used:"):
             if align_record is not None:
-                for record in align_record.getMutations():
-                    outline = ""
-                    if len(quality) > 0:
-                        phred = quality[int(record[2])]
-                    else:
-                        phred = "NA"
-                    for item in record:
-                        outline = outline + "," + str(item)
-                    outline = outline[1:] + "," + str(phred) + "\n"
-                    sys.stdout.write(outline)
+                if analysisType == MUTATION:
+                    for record in align_record.getMutations():
+                        outline = ""
+                        if len(quality) > 0:
+                            phred = quality[int(record[2])]
+                        else:
+                            phred = "NA"
+                        for item in record:
+                            outline = outline + "," + str(item)
+                        outline = outline[1:] + "," + str(phred) + "\n"
+                        sys.stdout.write(outline)
+                #align_record.printOut()
+                if analysisType == CDR:
+                    cdr1 = align_record.getRegion("CDR1")
+                    cdr2 = align_record.getRegion("CDR2")
+                    cdr3 = align_record.getRegion("CDR3")
+                    sys.stdout.write(align_record.getQuery().getName() + "," + cdr1 + "," + cdr2 + "," + cdr3 + "\n")
                 if extractCoverage:
                     coverage_record = [align_record.getQuery().getName(), "NA", -1, -1, "NA", -1, -1]
                     if align_record.get_v_sequence() is not None:
@@ -164,7 +198,10 @@ def main(argv):
                     astart = len(query_seq.getSequence())
                     query_seq.addSequence(tokens[2], tokens[1], tokens[3])
                 offset = line.index(tokens[2])
+                # Add translation row
                 query_seq.addTranslation(previous_line[offset:])
+                # Add annotation row
+                align_record.addAnnoation(previous_line2[offset:])
             elif re.match("^V", line):
                 if vseq is None:
                     vseq = Sequence(tokens[5], tokens[4], tokens[6], tokens[3])
@@ -181,14 +218,12 @@ def main(argv):
             extractAlign=False
             
         # Cache previous line
+        previous_line2 = previous_line
         previous_line = line    
 
     # Output the coverage report
     if extractCoverage:
         coveragefile.close()
-
-def usage():
-    print 'cat igblastn_outputfile.txt | python parseIgBlast.py [--fastq fastq_file] [--coverage coverage_report_file]'
 
 if __name__ == "__main__":
     main(sys.argv[1:])

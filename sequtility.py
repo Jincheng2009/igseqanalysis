@@ -32,6 +32,18 @@ codontable = {
 
 
 def getNeighboringBases(seq, center, ahead, after):
+    """
+    Given a sequence and the position of interest, extract the sub-sequence from -ahead bp to +after bp 
+    Gap "-" is skipped in the extraction.
+    @type seq: string
+    @param seq: the sequence in string
+    @type center: int
+    @param center: position of interest
+    @type ahead: int
+    @param ahead: number of bp before center
+    @type after: int
+    @param after: number of bp after center
+    """
     ungapped_seq = seq.repalce("-","")
     nlen = len(ungapped_seq)
     ngap = seq[0:center].count("-")
@@ -55,14 +67,40 @@ class Alignment:
         self.query = None
         self.vseq = None
         self.jseq = None
+        self.annotation = None
         
-    def setQuery(self, seq):
+    def setQuery(self, seq, annotation=None):
         self.query=seq
+        # If annotation exist
+        if annotation is not None and annotation:
+            self.annotation = annotation
         
     def hasQuery(self,seq):
         if seq in self.alignDict:
             return True
         return False
+        
+    def addAnnoation(self, annotation):
+        if self.annotation is None:
+            self.annotation = ""
+        if annotation is not None and annotation:
+            self.annotation = self.annotation + annotation
+            
+    def getRegion(self, type):
+        index = self.annotation.find(type)
+        if index < 0:
+            return ""
+        else:
+            query_seq = self.query.getSequence()
+            start = self.annotation.rfind("<", 0, index)
+            if start == 0 or self.annotation[start-1]!=">":
+                start = -1
+            end = self.annotation.find(">", index)
+            if end == len(query_seq):
+                end = -1
+            if start >= 0 and end >= 0:
+                return query_seq[start:end]
+                
         
     def add_v_alignment(self, reference, start):
         self.vseq = reference
@@ -78,6 +116,8 @@ class Alignment:
         return self.query   
         
     def printOut(self):
+        if self.annotation is not None:
+            sys.stdout.write(self.annotation + "\n")
         if self.query.getTranslation() is not None:
             sys.stdout.write(self.query.getTranslation() + "\n")
         sys.stdout.write(self.query.getSequence() + "\n")
@@ -210,4 +250,3 @@ class Sequence:
     
     def isStrandPlus(self):
         return self.strandPlus
-       
