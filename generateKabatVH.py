@@ -109,6 +109,7 @@ if os.path.isfile(jh_fasta):
 kabat_j_input = open("C:\Software\igblast-1.5.0\data\optional_file\human_gl.aux", "r")
 count = 0 
 kabatj = {}
+kabatj2 = {}
 for line in kabat_j_input.readlines():
     count = count +  1
     if count > 3:
@@ -118,21 +119,33 @@ for line in kabat_j_input.readlines():
         gene = extractGeneName(germline)
         frame = tokens[1]
         kabatj[germline]=frame
+        if(len(tokens) > 3):
+            kabatj2[germline]=int(tokens[3])
 
 for germline in fasta_dict:
     size = len(fasta_dict[germline].seq)
     frame = int(kabatj[germline])
     bf = (size - frame) % 3
     start = frame
+    cdr_end = kabatj2[germline]
     gene = extractGeneName(germline)
-    for i in range(size, 0, -1):
-        if i > end:
+    for i in range(cdr_end + 2, size+1):
+        kabat = (i- cdr_end - 2 +3)/3 + 102
+        if kabat > 113:
             kabat = "NA"
-        elif i <= start:
-            kabat = "NA"
-        else:
-            kabat = "H" + str(113 - (end - i + 2) / 3)
+        if not kabat == "NA":    
+            kabat = "H" + str(kabat)    
         record = [germline, gene, str(i), kabat]    
         writer.writerow(record)
-    
+    n_aa = (cdr_end - start + 1) / 3
+    for i in range(cdr_end+1, start, -1):
+        kabat = 103 - (cdr_end + 1 - i +3)/3
+        if n_aa == 9:
+            if kabat == 100:
+                kabat = "100A"
+            elif kabat < 100:
+                kabat = kabat + 1
+        kabat = "H" + str(kabat)
+        record = [germline, gene, str(i), kabat]    
+        writer.writerow(record)        
 outfile.close()    
