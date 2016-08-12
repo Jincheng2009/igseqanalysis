@@ -6,11 +6,9 @@ import re
 import numpy as np
 
 def main(argv):
-    germline = pd.read_csv("/home/wuji/tools/imgt/germline_kabat.csv")
-    germline.columns = ['gene', 'family','position', 'label']
-    append=False
+    kabatFile = None
     try:
-        opts, args = getopt.getopt(argv,"ha", ["output=", "coverage="])
+        opts, args = getopt.getopt(argv,"ha", ["output=", "coverage=", "kabat="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -22,9 +20,14 @@ def main(argv):
             fileout = arg
         elif opt == "-a":
             append=True
+        elif opt =="--kabat":
+            kabatFile = arg
     ######################################
     ## Custom import data section
     ######################################  
+    germline = pd.read_csv(kabatFile)
+    germline.columns = ['gene', 'family','position', 'label']
+    append=False
     df = pd.read_csv(sys.stdin, header=None)
     col_names = ['id', 'germline', 'query_pos', 'ref_pos', 'query_base', 'ref_base', 'query_aa', 'ref_aa']
     col_names.extend(['query_b2', 'query_b1', 'query_a1', 'query_a2', 'ref_b2', 'ref_b1', 'ref_a1', 'ref_a2', 'phred'])
