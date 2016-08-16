@@ -2,13 +2,21 @@ import pandas as pd
 from natsort import natsorted
 import sys
 import getopt
-import re
 import numpy as np
+
+
+def usage():
+    print 'python extractIgFeatures.py [-a] [--kabat kabet_file] [--output outputfile]'
+    print '-a\t append to the output file'
+    print '-k --kabat\t kabat scale file to annotate position into kabat label'
+    print '-o --output\t output file to save extracted Ig features'
+    print '-q \t Phred score (integer) to filter out mutation below this threshold (e.g. 32)'
 
 def main(argv):
     kabatFile = None
+    qfilter = -1
     try:
-        opts, args = getopt.getopt(argv,"ha", ["output=", "coverage=", "kabat="])
+        opts, args = getopt.getopt(argv,"hao:k:q:", ["output=", "coverage=", "kabat="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -16,18 +24,19 @@ def main(argv):
         if opt == "-h":
             usage()
             sys.exit()
-        elif opt == "--output":
+        elif opt in ("-o", "--output"):
             fileout = arg
         elif opt == "-a":
             append=True
-        elif opt =="--kabat":
+        elif opt in ("-k", "--kabat"):
             kabatFile = arg
+        elif opt == "-g":
+            qfilter = int(arg)
     ######################################
     ## Custom import data section
     ######################################  
     germline = pd.read_csv(kabatFile)
     germline.columns = ['gene', 'family','position', 'label']
-    append=False
     df = pd.read_csv(sys.stdin, header=None)
     col_names = ['id', 'germline', 'query_pos', 'ref_pos', 'query_base', 'ref_base', 'query_aa', 'ref_aa']
     col_names.extend(['query_b2', 'query_b1', 'query_a1', 'query_a2', 'ref_b2', 'ref_b1', 'ref_a1', 'ref_a2', 'phred'])
@@ -36,7 +45,8 @@ def main(argv):
     # 1. Remove mutation with "N"
     n1 = df.shape[0]
     df = df[df['query_base']!="N"]
-    df = df[df['phred']>=15]
+    if qfilter > 0:
+        df = df[df['phred']>=qfilter]
     n2 = df.shape[0]
     print "removing " + str(n1 - n2) + " rows"
     df['germline'] = df['germline'].map(str.strip)
@@ -95,11 +105,6 @@ def main(argv):
         count_table.to_csv(fileout, mode='a', index=False, header=False)
     else:
         count_table.to_csv(fileout, index=False)
-    
-
-def usage():
-    print 'python extractIgFeatures.py [-a] [--output outputfile]'
-    print '-a: append to the output file'
 
 if __name__ == "__main__":
     main(sys.argv[1:])
