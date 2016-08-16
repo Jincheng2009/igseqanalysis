@@ -18,9 +18,15 @@ library(rmarkdown)
 library(ggplot2)
 library(data.table)
 
-metafile <- "C:/Java/data/george2/metadata.json"
+metafile <- "C:/Java/data/sarav8tile/metadata.json"
 datapath <- dirname(metafile)
 metadata <- fromJSON(file=metafile)
+
+remove.idx <- which(sapply(metadata, function(x) x$sample=="S5"))
+remove.idx <- remove.idx[order(remove.idx, decreasing=T)]
+for(index in remove.idx) {
+    metadata[[index]] <- NULL
+}
 
 meta.df <- c()
 name.vector <- names(metadata[[1]])

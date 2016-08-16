@@ -14,7 +14,6 @@ complement['a'] = 't'
 complement['t'] = 'a'
 complement['g'] = 'c'
 complement['c'] = 'g'
-complement['-'] = '-'
 
 CDRH1start = 115 + 1
 CDRH1end = 130 + 1
