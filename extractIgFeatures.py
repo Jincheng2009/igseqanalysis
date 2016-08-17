@@ -15,6 +15,7 @@ def usage():
 def main(argv):
     kabatFile = None
     qfilter = -1
+    append=False
     try:
         opts, args = getopt.getopt(argv,"hao:k:q:", ["output=", "coverage=", "kabat="])
     except getopt.GetoptError:
