@@ -31,7 +31,7 @@ def main(argv):
             append=True
         elif opt in ("-k", "--kabat"):
             kabatFile = arg
-        elif opt == "-g":
+        elif opt == "-q":
             qfilter = int(arg)
     ######################################
     ## Custom import data section
