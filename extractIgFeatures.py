@@ -11,13 +11,15 @@ def usage():
     print '-k --kabat\t kabat scale file to annotate position into kabat label'
     print '-o --output\t output file to save extracted Ig features'
     print '-q \t Phred score (integer) to filter out mutation below this threshold (e.g. 32)'
+    print '-t --type \t Type of mutation to be parsed, either DNA or AA. If parameter is AA, only extract missense mutations'
 
 def main(argv):
     kabatFile = None
     qfilter = -1
     append=False
+    seqType="AA"
     try:
-        opts, args = getopt.getopt(argv,"hao:k:q:", ["output=", "coverage=", "kabat="])
+        opts, args = getopt.getopt(argv,"hao:k:q:t:", ["output=", "coverage=", "kabat=", "type="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -33,6 +35,11 @@ def main(argv):
             kabatFile = arg
         elif opt == "-q":
             qfilter = int(arg)
+        elif opt in ("-t", "--type"):
+            if arg == "DNA":
+                seqType="DNA"
+            elif arg == "AA":
+                seqType="AA"
     ######################################
     ## Custom import data section
     ######################################  
@@ -55,17 +62,18 @@ def main(argv):
     # 2. Merge germline dataframe with mutation dataframe
     df = pd.merge(df, germline, left_on=['germline', 'ref_pos'], right_on = ['gene','position'] )
     df = df.sort_values(by=['id','query_pos'])
-    
+    if seqType == "AA":
+        df1 = df[df['ref_aa'] != df["query_aa"]]
+    else:
+        df1 = df   
     # 3. Get dataframe with number of mutation for each kabat number for each sequence
-    df_count = df.groupby(['id','label']).size()
+    df_count = df1.groupby(['id','label']).size()
+    # Check to see whether extract DNA or AA (missense) mutation    
     df_count = df_count.reset_index()
     df_count.columns = ['id', 'label', 'count']
-    
-    # 3.temp Get the germline alignment length data
-    #df_germline = df[['id','isotype','germline','length']].drop_duplicates()
-    #df_germline = df_germline[df_germline['germline'].str.startswith("IGHV")]
-    #df_germline[df_germline['isotype']=='IgG']['length'].describe()
-    #df_germline[df_germline['isotype']=='IgM']['length'].describe()
+    if seqType == "AA":
+        df_count['count'] = np.where(df_count['count']>0, 1, 0)
+
     
     # 4. Reorder columns
     count_table = df_count.pivot(index="id", columns="label", values="count")
