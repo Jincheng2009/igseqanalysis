@@ -98,7 +98,7 @@ def main(argv):
     #     0 - nonsense
     #     1 - sense
     df2 = df[['id','query_aa','ref_aa','label']]
-    df2['sense_mut'] = np.where(df2['query_aa']==df2['ref_aa'], 0, 1)
+    df2['sense_mut'] = np.where(df2['query_aa']==df2['ref_aa'], 1, 0)
     mut_count = df2.groupby(['id'])['sense_mut'].sum()
     mut_count = mut_count.reset_index()
     temp = df2['id'].value_counts()
