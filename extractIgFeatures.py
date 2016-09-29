@@ -19,7 +19,7 @@ def main(argv):
     append=False
     seqType="AA"
     try:
-        opts, args = getopt.getopt(argv,"hao:k:q:t:", ["output=", "coverage=", "kabat=", "type="])
+        opts, args = getopt.getopt(argv,"hao:k:q:t:", ["output=", "kabat=", "type="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -107,7 +107,8 @@ def main(argv):
     mut_count = pd.merge(mut_count, temp)
     mut_count['missense_mut'] = mut_count.total - mut_count.sense_mut
     mut_count = mut_count.drop('total', 1)
-    count_table = pd.merge(count_table, mut_count)
+    count_table = pd.merge(count_table, mut_count, how='right')
+    count_table = count_table.fillna(0)
     
     # 6. Output data into csv file
     if append:
