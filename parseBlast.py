@@ -20,7 +20,7 @@ def analyzeMutation(qstart, qseq, refstart, refseq, fastaid, ref, strandforward)
     mutations =[]
     querygap = 0
     refgap=0
-    for i in range(0,len(qseq)-1):
+    for i in range(0,len(qseq)):
         details = []
         if refseq[i] == '-':
             refgap += 1
@@ -112,7 +112,7 @@ def main(argv):
         line=line.strip()
         if line.startswith("Query="): 
             nextRefLength = False
-            fastaid=line[7:].split(' ')[0]
+            fastaid=line[7:].split(' ')[0].strip()
             quality=[]
             count += 1
             if extractFastq and fastq_dict.has_key(fastaid):
