@@ -135,7 +135,7 @@ def main(argv):
                     cdr1 = align_record.getRegion("CDR1")
                     cdr2 = align_record.getRegion("CDR2")
                     cdr3 = align_record.getRegion("CDR3")
-                    sys.stdout.write(align_record.getQuery().getName() + "," + cdr1 + "," + cdr2 + "," + cdr3 + "\n")
+                    sys.stdout.write(align_record.getQuery().getName() + "," + vgene + "," + jgene+ "," + cdr1 + "," + cdr2 + "," + cdr3 + "\n")
                 if extractCoverage:
                     coverage_record = [align_record.getQuery().getName(), "NA", -1, -1, "NA", -1, -1]
                     if align_record.get_v_sequence() is not None:

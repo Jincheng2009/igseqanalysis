@@ -100,6 +100,9 @@ class Alignment:
                 end = -1
             if start >= 0 and end >= 0:
                 return query_seq[start:end]
+            else:
+                return ""
+
                 
         
     def add_v_alignment(self, reference, start):
