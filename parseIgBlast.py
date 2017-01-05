@@ -157,11 +157,11 @@ def main(argv):
     
         if extractGermline and line.startswith("IG"):
             gene = line.split(' ')[0]
-            if gene.startswith("IGHV") or gene.startswith("IGLV"):
+            if gene.startswith("IGHV") or gene.startswith("IGLV") or gene.startswith("IGKV"):
                 vgene = gene
             elif gene.startswith("IGHD"):
                 dgene = gene
-            elif gene.startswith("IGHJ") or gene.startswith("IGLJ"):
+            elif gene.startswith("IGHJ") or gene.startswith("IGLJ") or gene.startswith("IGKJ"):
                 jgene = gene
                 
         ## Extract strand information
@@ -174,12 +174,12 @@ def main(argv):
             extractStrand=False
             tokens = line.split('\t')
             strand=tokens[-1]
-            frame=tokens[-2]
+            frame=tokens[-3]
             if strand=="+":
                 strandPlus=True
             else:
                 strandPlus=False
-            if frame=="No":
+            if frame!="In-frame":
                 inframe=False
     
         ## Extract alignment information

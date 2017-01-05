@@ -9,6 +9,7 @@ import getopt
 
 def main(argv):
     idx = 5
+    readFromFile = False
     try:
         opts, args = getopt.getopt(argv,"hi:p:")
     except getopt.GetoptError:
@@ -23,17 +24,21 @@ def main(argv):
         elif opt == "-p":
             idx = int(arg)
 
-    with open(csvfile) as filein:
-        for line in filein:
-            line = line.rstrip()
-            tokens = line.split(",")
-            if len(tokens) == 0:
-                continue
-            fastaid = tokens[0]
-            germline = tokens[1] + "+" + tokens[2]
-            cdr3 = tokens[idx]
-            sys.stdout.write(">" + fastaid + "||" + germline + "\n")
-            sys.stdout.write(cdr3 + "\n")
+    if readFromFile:
+        filein = open(csvfile)
+    else:
+        filein = sys.stdin
+
+    for line in filein:
+        line = line.rstrip()
+        tokens = line.split(",")
+        if len(tokens) == 0:
+            continue
+        fastaid = tokens[0]
+        germline = tokens[1] + "+" + tokens[2]
+        cdr3 = tokens[idx]
+        sys.stdout.write(">" + fastaid + "||" + germline + "\n")
+        sys.stdout.write(cdr3 + "\n")
 
 if __name__ == "__main__":
     main(sys.argv[1:])
