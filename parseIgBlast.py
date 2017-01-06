@@ -210,13 +210,13 @@ def main(argv):
                 query_seq.addTranslation(previous_line[offset:])
                 # Add annotation row
                 align_record.addAnnoation(previous_line2[offset:])
-            elif re.match("^V", line):
+            elif re.match("^V", line) and len(tokens) > 6:
                 if vseq is None:
                     vseq = Sequence(tokens[5], tokens[4], tokens[6], tokens[3])
                     align_record.add_v_alignment(vseq, astart)
                 else:
                     vseq.addSequence(tokens[5], tokens[4], tokens[6])    
-            elif re.match("^J", line):
+            elif re.match("^J", line) and len(tokens) > 6:
                 if jseq is None:
                     jseq = Sequence(tokens[5], tokens[4], tokens[6], tokens[3])
                     align_record.add_j_alignment(jseq, astart)
