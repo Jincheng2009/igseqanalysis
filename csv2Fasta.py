@@ -32,11 +32,12 @@ def main(argv):
     for line in filein:
         line = line.rstrip()
         tokens = line.split(",")
-        if len(tokens) == 0:
+        if len(tokens) < 5 or len(tokens[5]) == 0:
             continue
         fastaid = tokens[0]
         germline = tokens[1] + "+" + tokens[2]
         cdr3 = tokens[idx]
+        cdr3 = cdr3.replace("-","")
         sys.stdout.write(">" + fastaid + "||" + germline + "\n")
         sys.stdout.write(cdr3 + "\n")
 

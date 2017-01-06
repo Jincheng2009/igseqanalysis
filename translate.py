@@ -30,18 +30,15 @@ def main(argv):
         if line.startswith(">"):
             fastaid = line
         # Skip sequences not in frame
-        # elif len(line) % 3 == 0:
-        else:
-            sys.stdout.write(fastaid + "\n")
-            sys.stdout.write(str(len(line)) + "\n")
+        elif len(line) % 3 == 0:
             i = 0
             prot = ""
             seq = line.upper()
             while i + 3 <= len(line):
-                prot = prot.join(sequtility.codontable[line[i: i + 3]])
+                prot = prot + sequtility.codontable[line[i: i + 3]]
                 i += 3
             sys.stdout.write(fastaid + "\n")
-            sys.stdout.write(seq + "\n")
+            sys.stdout.write(prot + "\n")
 
 if __name__ == "__main__":
     main(sys.argv[1:])
