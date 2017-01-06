@@ -101,7 +101,7 @@ class Alignment:
             if start >= 0 and end >= 0:
                 result = query_seq[start:end+1]
                 # Remove alignment gaps
-                result = result.replace("-"."")
+                result = result.replace("-","")
                 return result
             else:
                 return ""
