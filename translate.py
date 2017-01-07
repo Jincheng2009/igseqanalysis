@@ -25,8 +25,8 @@ def main(argv):
     for line in filein:
         line = line.rstrip()
         # Skip empty lines
-        #if not line:
-        #    continue
+        if not line:
+            continue
         if line.startswith(">"):
             fastaid = line
         # Skip sequences not in frame
@@ -35,10 +35,14 @@ def main(argv):
             prot = ""
             seq = line.upper()
             while i + 3 <= len(line):
-                prot = prot + sequtility.codontable[line[i: i + 3]]
+                if line[i: i + 3] in sequtility.codontable:
+                    prot = prot + sequtility.codontable[line[i: i + 3]]
+                else:
+                    prot = prot + "X"
                 i += 3
-            sys.stdout.write(fastaid + "\n")
-            sys.stdout.write(prot + "\n")
+            if "X" not in prot:
+                sys.stdout.write(fastaid + "\n")
+                sys.stdout.write(prot + "\n")
 
 if __name__ == "__main__":
     main(sys.argv[1:])
