@@ -60,7 +60,7 @@ def main(argv):
         sys.stdout.write(record + "\n")
 
 def usage():
-    print 'cat dna.fasta | python translate.py > prot.fasta'    
+    print 'cat dna.fasta | python translateTable.py -p 3,4,5,8,9,10 > prot.fasta'    
 
 if __name__ == "__main__":
     main(sys.argv[1:])

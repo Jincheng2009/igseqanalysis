@@ -1,7 +1,6 @@
 import sys
 import getopt
 import pandas as pd
-pd.set_option('display.max_colwidth', -1)
 
 def main(argv):
     file1 = None
