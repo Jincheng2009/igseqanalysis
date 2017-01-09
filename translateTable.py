@@ -36,7 +36,8 @@ def main(argv):
         # Skip empty lines
         if not line:
             continue
-        tokens = line.split("\t")
+        line = line.replace("\t",",")
+        tokens = line.split(",")
         for i in idx:
             seq = tokens[i].upper()
             prot=""

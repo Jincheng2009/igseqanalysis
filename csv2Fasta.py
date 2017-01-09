@@ -10,8 +10,9 @@ import getopt
 def main(argv):
     idx = 5
     readFromFile = False
+    formatCDR = False
     try:
-        opts, args = getopt.getopt(argv,"hi:p:")
+        opts, args = getopt.getopt(argv,"hi:p:f")
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -23,6 +24,8 @@ def main(argv):
             csvfile = arg
         elif opt == "-p":
             idx = int(arg)
+        elif opt =="-f":
+            formatCDR = True
 
     if readFromFile:
         filein = open(csvfile)
