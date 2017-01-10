@@ -36,7 +36,7 @@ def main(argv):
         line = line.rstrip()
         line = line.replace("\t",",")
         tokens = line.split(",")
-        if len(tokens) < 5 or len(tokens[5]) == 0:
+        if len(tokens) < 6 or len(tokens[5]) == 0:
             continue
         fastaid = tokens[0]
         germline = tokens[1] + "+" + tokens[2]
