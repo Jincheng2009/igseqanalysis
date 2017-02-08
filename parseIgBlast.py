@@ -16,7 +16,7 @@ def usage():
     print 'Annotation region or mutation is output into standard output'
     print 'Use --type option to choose output type'
     print 'cat igblastn_outputfile.txt | python parseIgBlast.py -t mutation [--fastq fastq_file] [--coverage coverage_report_file] > mutation.csv'
-    print '-b --blast\t input file from output of ncbi-igblast'
+    print '-b --blast\t input file from output of ncbi-igblast (default: stdin)'
     print '-f --fastq\t fastq file (optional to extract Phred score of mutation)'
     print '-t --type \t Output type (mutation or CDR), output file is CSV format'
     print '-c --coverage\t Outpufile (optional for coverage for each alignment)'
@@ -82,11 +82,10 @@ def main(argv):
         fastq_dict=SeqIO.index(fastqfile,"fastq")
 
     for line in filein:
-        ## Not trim the end when parsing the alignment section
         line = line.strip('\n')
+        ## Do not trim the end when parsing the alignment section
         if not extractAlign:
             line=line.rstrip()
-        # line=line.strip()
         if line.startswith("Query="):
             align_record=None
             inframe=True
@@ -225,7 +224,7 @@ def main(argv):
         if extractAlign and line.startswith("Lambda"): 
             extractAlign=False
             
-        # Cache previous line
+        # Cache previous two lines
         previous_line2 = previous_line
         previous_line = line    
 

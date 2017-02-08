@@ -7,10 +7,13 @@ complement['G'] = 'C'
 complement['C'] = 'G'
 complement['-'] = '-'
 complement['N'] = 'N'
-complement['NA'] = 'NA'
 
 bases = ['A','T','C','G']
 
+## Stop codon has specific symbol:
+## Amber TAG - B
+## Orchre TAA - O
+## opal TGA - J
 codontable = {
 'ATA':'I', 'ATC':'I', 'ATT':'I', 'ATG':'M',
 'ACA':'T', 'ACC':'T', 'ACG':'T', 'ACT':'T',
@@ -71,7 +74,7 @@ class Alignment:
         
     def setQuery(self, seq, annotation=None):
         self.query=seq
-        # If annotation exist
+        # If annotation exists
         if annotation is not None and annotation:
             self.annotation = annotation
         
@@ -106,8 +109,6 @@ class Alignment:
             else:
                 return ""
 
-                
-        
     def add_v_alignment(self, reference, start):
         self.vseq = reference
         pad = "".join('-' for i in range(start))
