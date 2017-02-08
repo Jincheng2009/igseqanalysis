@@ -11,6 +11,7 @@ Igseqanalysis is a package developed in Python that parse and process the NCBI-I
 
 ## Workflow
 1. IgBlast
+```
 cat sample/sample_R1.fasta | igblastn -germline_db_V ~/tools/imgt/human_V \
                            			  -germline_db_D ~/tools/imgt/human_D \
                						  -germline_db_J ~/tools/imgt/human_J \
@@ -19,8 +20,9 @@ cat sample/sample_R1.fasta | igblastn -germline_db_V ~/tools/imgt/human_V \
                						  -show_translation -num_alignments_V 1 \
                						  -num_alignments_J 1 \
                						  -num_alignments_D 1 \
-| python igseqanalysis/parseIgBlast.py -t CDR > annotation/sample_R1.csv
-
+| python igseqanalysis/parseIgBlast.py -t CDR > sample/sample_R1.csv
+```
+```
 cat sample/sample_R2.fasta | igblastn -germline_db_V ~/tools/imgt/human_V \
                            			  -germline_db_D ~/tools/imgt/human_D \
                						  -germline_db_J ~/tools/imgt/human_J \
@@ -29,25 +31,34 @@ cat sample/sample_R2.fasta | igblastn -germline_db_V ~/tools/imgt/human_V \
                						  -show_translation -num_alignments_V 1 \
                						  -num_alignments_J 1 \
                						  -num_alignments_D 1 \
-| python igseqanalysis/parseIgBlast.py -t CDR > annotation/sample_R2.csv
-
+| python igseqanalysis/parseIgBlast.py -t CDR > sample/sample_R2.csv
+```
 2. Pair VH with VL
-python ../repseqanalysis/pairByID.py -l ../annotation/638_em_S3_L001_R1_001.filter_VH.tsv \
-                                   -r ../annotation/638_em_S3_L001_R2_001.filter_VL.tsv \
-                                   -o ../annotation/S3.paired.tsv
-
+```
+python igseqanalysis/pairByID.py -l sample/sample_R1.csv \
+                                   -r sample/sample_R2.csv \
+                                   -o sample/sample.paired.tsv
+```
 3. Translate DNA into protein for CDR sequences
-cat $f | python ../repseqanalysis/translateTable.py -p 3,4,5,8,9,10 > "../annotation/"$name".tsv"
-
+```
+cat sample/sample.paired.tsv | python ../igseqanalysis/translateTable.py -p 3,4,5,8,9,10 > sample/sample.paired.prot.tsv
+```
 4. Count the unique CDR3
-cat $f | python ../repseqanalysis/countUnique.py -p 5,10 > "../CDR/"$name".CDR3.count"
-
+```
+cat sample/sample.paired.prot.tsv | python ../igseqanalysis/countUnique.py -p 5,10 > sample/sample.paired.CDR3.count
+```
 5. Convert CDR3 in CSV format to fasta format for usearch clustering
-cat $f | python ../repseqanalysis/csv2Fasta.py -p 5 > "../CDR/"$name".VH.prot.fasta"
-cat $f | python ../repseqanalysis/csv2Fasta.py -p 10 > "../CDR/"$name".VL.prot.fasta"
-
+```
+cat sample/sample.paired.prot.tsv | python ../igseqanalysis/csv2Fasta.py -p 5  > sample/sample.VH.fasta
+cat sample/sample.paired.prot.tsv | python ../igseqanalysis/csv2Fasta.py -p 10 > sample/sample.VL.fasta
+```
 6. Clustering CDR3 by usearch
-usearch -cluster_fast $f -id 0.88 -sort size -uc "../cluster/"$name".uc" -fulldp -maxgaps 0
-
+```
+usearch -cluster_fast sample/sample.VH.fasta -id 0.88 -sort size -uc sample/sample.VH.uc -fulldp -maxgaps 0
+usearch -cluster_fast sample/sample.VL.fasta -id 0.88 -sort size -uc sample/sample.VL.uc -fulldp -maxgaps 0
+```
 7. Format the usearch result into tabular format
-python ../repseqanalysis/formatCluster.py -c $f -f "../CDR/"$name".fasta" > "../unpaired/"$name".cluster.count"
+```
+python igseqanalysis/formatCluster.py -c sample/sample.VH.uc -f sample/sample.R2.fasta > sample/sample.R1.cluster.count
+python igseqanalysis/formatCluster.py -c sample/sample.VL.uc -f sample/sample.R1.fasta > sample/sample.R1.cluster.count
+```
