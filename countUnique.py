@@ -9,8 +9,7 @@ import getopt
 import pandas as pd
 
 def main(argv):
-    idx = 5
-    delim = ","
+    idx = []
     try:
         opts, args = getopt.getopt(argv,"hi:p:d:")
     except getopt.GetoptError:
@@ -21,17 +20,24 @@ def main(argv):
             usage()
             sys.exit()
         elif opt == "-p":
-            idx = int(arg)
+            idx_str = arg
+
+    idx = map(int, idx_str.split(","))
+
+    if len(idx) == 0:
+        usage()
+        sys.exit(2)
 
     df = pd.read_table(sys.stdin, sep="\t", header=None)
-    if idx > df.shape[1]:
+    if max(idx) > df.shape[1]:
     	sys.stderr.write("column index out of range \n")
 
-    colnames = df.columns
-    df = df[df[idx] != "."]
-    count_df = df.groupby(colnames[idx]).size()
+    colnames = []
+    for i in idx:
+    	colnames.append(df.columns[i])
 
-    count_df.to_csv(sys.stdout, sep="\t", index=True, header=False, na_rep='.')
+    count_df = df.groupby(colnames).size().reset_index()
+    count_df.to_csv(sys.stdout, sep="\t", index=False, header=False, na_rep='.')
 
 if __name__ == "__main__":
     main(sys.argv[1:])

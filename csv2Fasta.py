@@ -10,8 +10,9 @@ import getopt
 def main(argv):
     idx = 5
     readFromFile = False
+    formatCDR = False
     try:
-        opts, args = getopt.getopt(argv,"hi:p:")
+        opts, args = getopt.getopt(argv,"hi:p:f")
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -23,6 +24,8 @@ def main(argv):
             csvfile = arg
         elif opt == "-p":
             idx = int(arg)
+        elif opt =="-f":
+            formatCDR = True
 
     if readFromFile:
         filein = open(csvfile)
@@ -31,15 +34,17 @@ def main(argv):
 
     for line in filein:
         line = line.rstrip()
+        line = line.replace("\t",",")
         tokens = line.split(",")
-        if len(tokens) < 5 or len(tokens[5]) == 0:
+        if len(tokens) < 6 or len(tokens[5]) == 0:
             continue
         fastaid = tokens[0]
         germline = tokens[1] + "+" + tokens[2]
         cdr3 = tokens[idx]
         cdr3 = cdr3.replace("-","")
-        sys.stdout.write(">" + fastaid + "||" + germline + "\n")
-        sys.stdout.write(cdr3 + "\n")
+        if len(cdr3) > 1:
+            sys.stdout.write(">" + fastaid + "||" + germline + "\n")
+            sys.stdout.write(cdr3 + "\n")
 
 if __name__ == "__main__":
     main(sys.argv[1:])

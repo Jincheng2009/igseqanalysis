@@ -1,7 +1,6 @@
 import sys
 import getopt
 import pandas as pd
-pd.set_option('display.max_colwidth', -1)
 
 def main(argv):
     file1 = None
@@ -25,8 +24,8 @@ def main(argv):
     if file1 is None or file2 is None:
         sys.stderr.write("missing input file \n")
 
-    df1 = pd.read_table(file1, sep=",", header=None)
-    df2 = pd.read_table(file2, sep=",", header=None)
+    df1 = pd.read_table(file1, sep="\t", header=None)
+    df2 = pd.read_table(file2, sep="\t", header=None)
 
     df1_vh = df1[map(lambda x : x.startswith('IGHV'),df1[1])]
     df1_vl = df1[map(lambda x : x.startswith('IGKV') or x.startswith('IGLV'),df1[1])]
