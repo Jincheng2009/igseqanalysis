@@ -15,7 +15,7 @@ Igseqanalysis is a package developed in Python that parse and process the NCBI-I
 
 Change directory to the igseqanalysis folder and start the workflow.
 
-###1. Annotate sequence by IgBlast
+### 1. Annotate sequence by IgBlast
 
 IMGT folder contains the VDJ database built by blast with the fasta files. If you want to use database other than the one provided in the package, you could build a new one following the instructions in NCBI-Igblast and specify the location using -germline_db_V, -germline_db_D and -germline_db_J options.
 
