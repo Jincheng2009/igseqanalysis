@@ -60,8 +60,9 @@ def main(argv):
     df.sort_values(['CDR3c', 'count'], ascending=[True, False], inplace=True)
     df.to_csv(output, sep="\t", index=False, header=False, na_rep='.')
 
-if __name__ == "__main__":
-    main(sys.argv[1:])
-    
 def usage():
     print 'python formatCluster.py -c usearch_cluster.uc -f input.fasta > out.tsv'    
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
+

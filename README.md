@@ -17,7 +17,7 @@ Change directory to the igseqanalysis folder and start the workflow.
 
 ### 1. Annotate sequence by IgBlast
 
-IMGT folder contains the VDJ database built by blast with the fasta files. If you want to use database other than the one provided in the package, you could build a new one following the instructions in NCBI-Igblast and specify the location using -germline_db_V, -germline_db_D and -germline_db_J options.
+IMGT folder contains the VDJ database built by blast with the fasta files. If you want to use database other than the one provided in the package, you could build a new one following the instructions in NCBI-Igblast and specify the location using `-germline_db_V`, `-germline_db_D` and `-germline_db_J` options.
 
 #### Annotate Sequences in Read 1
 
@@ -89,7 +89,7 @@ If you want to cluster the unique CDR3 in DNA sequences, you could provide the D
 
 ### 6. Clustering CDR3 by usearch
 
-Clustering could efficiently reduce the effect of PCR and sequencing errors, but at expense of cluster a real unique VH/VL into another VH/VL. `id 0.88` for protein sequences allows 1 amino acid difference when CDR length is between 9 and 16, and 2 amino acid difference when CDR length is between 17 and 24. If clustering DNA sequences, `id 0.96` is similar to `-id 0.88` for protein sequences. `-sort size` will enable the most abundant sequence is considered as the centroid sequence of the cluster. `-fulldp -maxgaps 0` disallow any gaps.
+Clustering could efficiently reduce the effect of PCR and sequencing errors, but at expense of cluster a real unique VH/VL into another VH/VL. `-id 0.88` for protein sequences allows 1 amino acid difference when CDR length is between 9 and 16, and 2 amino acid difference when CDR length is between 17 and 24. If clustering DNA sequences, `-id 0.96` is similar to `-id 0.88` for protein sequences. `-sort size` will enable the most abundant sequence is considered as the centroid sequence of the cluster. `-fulldp -maxgaps 0` disallow any gaps.
 
 	usearch -cluster_fast sample/sample.VH.fasta -id 0.88 -sort size -uc sample/sample.VH.uc -fulldp -maxgaps 0
 	usearch -cluster_fast sample/sample.VL.fasta -id 0.88 -sort size -uc sample/sample.VL.uc -fulldp -maxgaps 0

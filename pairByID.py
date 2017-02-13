@@ -39,8 +39,9 @@ def main(argv):
     df = pd.concat([part1, part2])
     df.to_csv(outfile, sep="\t", index=False, header=False, na_rep='.')
 
+def usage():
+    print 'python pairByID.py -l vh.csv -r vl.csv> paired.tsv'    
+
 if __name__ == "__main__":
     main(sys.argv[1:])
-    
-def usage():
-    print 'python pairByID.py -l vh.csv -r vl.csv> out.csv'    
+

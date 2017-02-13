@@ -10,9 +10,8 @@ import getopt
 def main(argv):
     idx = 5
     readFromFile = False
-    formatCDR = False
     try:
-        opts, args = getopt.getopt(argv,"hi:p:f")
+        opts, args = getopt.getopt(argv,"hi:p:")
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -24,8 +23,6 @@ def main(argv):
             csvfile = arg
         elif opt == "-p":
             idx = int(arg)
-        elif opt =="-f":
-            formatCDR = True
 
     if readFromFile:
         filein = open(csvfile)
@@ -46,9 +43,10 @@ def main(argv):
             sys.stdout.write(">" + fastaid + "||" + germline + "\n")
             sys.stdout.write(cdr3 + "\n")
 
+def usage():
+    print 'cat cdr.csv | python csv2Fasta.py -p 5 full.csv'    
+
 if __name__ == "__main__":
     main(sys.argv[1:])
-    
-def usage():
-    print 'python csv2Fasta.py -i full.csv'    
+
     

@@ -38,10 +38,11 @@ def main(argv):
 
     count_df = df.groupby(colnames).size().reset_index()
     count_df.to_csv(sys.stdout, sep="\t", index=False, header=False, na_rep='.')
+    
+def usage():
+    print 'cat CDR.csv | python countUnique.py -p 5,10 > out.tsv'
+    print '-p \t comma-separated list of column index for counting (0-based index)' 
 
 if __name__ == "__main__":
     main(sys.argv[1:])
-    
-def usage():
-    print 'cat CDR.csv | python countUnique.py > out.tsv'    
 
