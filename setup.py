@@ -1,5 +1,4 @@
-import re
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name = "igseqanalysis",
@@ -10,7 +9,7 @@ setup(
                             'csv2fasta = igseqanalysis.csv2fasta:main',
                             'formatcluster = igseqanalysis.formatCluster:main',
                             'translatetable = igseqanalysis.translateTable:main',
-                            'countunique = igseqanalysis.countUnique:main'
+                            'countunique =  igseqanalysis.countUnique:main'
                             ]
         },
     version = "0.0.1",
