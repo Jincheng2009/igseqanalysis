@@ -1,6 +1,5 @@
 #==============================================================================
-#     Copyright (C) 2017  Jincheng Wu <wuji@medimmune.com>
-#     Copyright (C) 2017  Research Bioinformatics, MedImmune
+#     Copyright (C) 2017  MedImmune, LLC
 #     
 #     This program is free software: you can redistribute it and/or modify
 #     it under the terms of the GNU General Public License as published by
