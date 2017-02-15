@@ -21,7 +21,6 @@ pip install .
 ```
 After the installation, run `parseigblast -h` and if the tool is successfully installed, it will print the command line instruction for the tool.
 
-
 ## Workflow
 
 The workflow below used the sample data that is included in the package which contains 2000 sequences. The sample_R1.fasta are VH sequences while sample_R2.fasta are VL sequences. 
