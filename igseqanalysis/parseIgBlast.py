@@ -22,7 +22,8 @@ def usage():
     print '-c --coverage\t Outpufile (optional for coverage for each alignment)'
 
     
-def main(argv):
+def main():
+    argv = sys.argv[1:]
     extractFastq=False
     extractCoverage=False
     extractID=False
@@ -233,4 +234,4 @@ def main(argv):
         coveragefile.close()
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()

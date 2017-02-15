@@ -7,7 +7,8 @@ Created on Thu Jan 05 14:58:59 2017
 import sys
 import getopt
 
-def main(argv):
+def main():
+    argv = sys.argv[1:]
     idx = 5
     readFromFile = False
     try:
@@ -44,9 +45,9 @@ def main(argv):
             sys.stdout.write(cdr3 + "\n")
 
 def usage():
-    print 'cat cdr.csv | python csv2Fasta.py -p 5 full.csv'    
+    print 'cat cdr.csv | python csv2fasta.py -p 5 full.csv'    
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()
 
     

@@ -2,7 +2,8 @@ import sys
 import getopt
 import sequtility
 
-def main(argv):
+def main():
+    argv = sys.argv[1:]
     readFromFile = False
     idx = []
     try:
@@ -65,7 +66,7 @@ def usage():
     print '-p \t comma-separated list of column index for translation (0-based index)'    
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()
     
 
     

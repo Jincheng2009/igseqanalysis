@@ -2,7 +2,8 @@ import sys
 import getopt
 import pandas as pd
 
-def main(argv):
+def main():
+    argv = sys.argv[1:]
     file1 = None
     file2 = None
     try:
@@ -43,5 +44,5 @@ def usage():
     print 'python pairByID.py -l vh.csv -r vl.csv> paired.tsv'    
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()
 

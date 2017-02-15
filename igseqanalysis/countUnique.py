@@ -8,7 +8,8 @@ import sys
 import getopt
 import pandas as pd
 
-def main(argv):
+def main():
+    argv = sys.argv[1:]
     idx = []
     try:
         opts, args = getopt.getopt(argv,"hi:p:d:")
@@ -44,5 +45,5 @@ def usage():
     print '-p \t comma-separated list of column index for counting (0-based index)' 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()
 

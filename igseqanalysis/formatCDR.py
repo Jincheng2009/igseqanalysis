@@ -1,7 +1,8 @@
 import sys
 import getopt
 
-def main(argv):
+def main():
+    argv = sys.argv[1:]
     position = 0
     trailing = False
     try:
@@ -37,9 +38,10 @@ def main(argv):
             newSeq=seq[:index] + fill + seq[index:]
             print newSeq
 
-    
-if __name__ == "__main__":
-    main(sys.argv[1:])
-    
 def usage():
     print 'cat CDRL3.fasta | python formatCDR.py -p 6 -t 23 -e'
+    
+if __name__ == "__main__":
+    main()
+    
+

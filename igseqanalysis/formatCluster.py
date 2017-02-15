@@ -3,7 +3,8 @@ import getopt
 import pandas as pd
 from Bio import SeqIO
 
-def main(argv):
+def main():
+    argv = sys.argv[1:]
     ucfile = None
     fafile = None
     outfile = None
@@ -64,5 +65,5 @@ def usage():
     print 'python formatCluster.py -c usearch_cluster.uc -f input.fasta > out.tsv'    
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()
 
