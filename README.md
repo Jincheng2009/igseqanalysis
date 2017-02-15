@@ -1,6 +1,6 @@
 # Immunoglobulin Sequence Analysis (igseqanalysis)
 
-Igseqanalysis is a package developed in Python that parse and process the NCBI-IgBlast alignment results of antibody sequences (NGS) to extract the CDR regions or mutations. 
+Igseqanalysis is a Python package for parsing and processing the NCBI-IgBlast alignment results of antibody sequences (NGS). The code can extract CDR regions and/or mutations, and cluster the extracted unique sequences with a user-defined sequence identity cutoff.
 
 ## Prerequisite
 * Python 2.7 [Installation instruction](https://www.python.org/download/releases/2.7/)
@@ -9,7 +9,7 @@ Igseqanalysis is a package developed in Python that parse and process the NCBI-I
 * Standalone NCBI-IgBlast 1.5.0 [Installation FTP site](ftp://ftp.ncbi.nih.gov/blast/executables/igblast/release/)
 * usearch [Installation site](http://www.drive5.com/usearch/) (Optional: needed if you want to cluster CDR sequence by identity)
 
-*Note: For convenience, add `igblastn` and `usearch` to environment PATH*
+*Note: For convenience, add `igblastn` and `usearch` to environment PATH. The development had been done on Red Hat Linux 6.*
 
 ## Workflow
 
