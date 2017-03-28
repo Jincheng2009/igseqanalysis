@@ -29,7 +29,7 @@ def main():
         usage()
         sys.exit(2)
 
-    df = pd.read_table(sys.stdin, sep="\t", header=None)
+    df = pd.read_table(sys.stdin, sep="\t", header=None, index_col=False)
     if max(idx) > df.shape[1]:
     	sys.stderr.write("column index out of range \n")
 

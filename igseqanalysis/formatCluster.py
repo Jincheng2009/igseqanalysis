@@ -41,7 +41,7 @@ def main():
     seq_df = pd.DataFrame(dict(fastaid=s1, seq=s2))
 
     # Read in clustering result
-    cluster = pd.read_table(ucfile, sep="\t", header=None)
+    cluster = pd.read_table(ucfile, sep="\t", header=None, index_col=False)
     cluster = cluster[cluster[0].isin(['S','H'])]
 
     df = pd.merge(cluster, seq_df, left_on = 8, right_on = 'fastaid')
