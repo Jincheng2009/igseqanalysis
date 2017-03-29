@@ -23,13 +23,15 @@ Created on Thu Jan 05 14:58:59 2017
 """
 import sys
 import getopt
+import pandas as pd
 
 def main():
     argv = sys.argv[1:]
     idx = 5
-    readFromFile = False
+    sizeout = False
+    csvfile=sys.stdin
     try:
-        opts, args = getopt.getopt(argv,"hi:p:")
+        opts, args = getopt.getopt(argv,"hi:p:s")
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -41,28 +43,40 @@ def main():
             csvfile = arg
         elif opt == "-p":
             idx = int(arg)
+        elif opt == "-s":
+            sizeout = True
 
-    if readFromFile:
-        filein = open(csvfile)
-    else:
-        filein = sys.stdin
+    df = pd.read_table(csvfile, sep="\t|,", header=None, engine='python', index_col=False)
+    if idx > df.shape[1]:
+        sys.stderr.write("column index out of range \n")
 
-    for line in filein:
-        line = line.rstrip()
-        line = line.replace("\t",",")
-        tokens = line.split(",")
-        if len(tokens) < 6 or len(tokens[5]) == 0:
+    count_df = df.groupby(idx).size().reset_index()
+    count_df.columns=[idx, "count"]
+    id_df = df.groupby(idx).head(1)
+    count_df = pd.merge(id_df, count_df, left_on=idx, right_on=idx)
+    count_df.sort_values("count", ascending=False, inplace=True)
+
+    for i, row in count_df.iterrows():
+        tokens = row.values
+        if len(tokens) <= idx:
+            continue
+        seq = tokens[idx]
+        if pd.isnull(seq):
             continue
         fastaid = tokens[0]
         germline = tokens[1] + "+" + tokens[2]
-        cdr3 = tokens[idx]
-        cdr3 = cdr3.replace("-","")
-        if len(cdr3) > 1:
-            sys.stdout.write(">" + fastaid + "||" + germline + "\n")
-            sys.stdout.write(cdr3 + "\n")
+        seq = seq.replace("-","")
+        if len(seq) > 1:
+            header = ">" + fastaid + ";" + germline
+            if sizeout:
+                count = row['count']
+                header = header + ";size=" + str(count)
+            header = header + "\n"
+            sys.stdout.write(header)
+            sys.stdout.write(seq + "\n")
 
 def usage():
-    print 'cat cdr.csv | python csv2fasta.py -p 5 full.csv'    
+    print 'cat cdr.csv | python csv2fasta.py -p 5 full.fasta'    
 
 if __name__ == "__main__":
     main()

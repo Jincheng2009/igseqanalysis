@@ -109,7 +109,7 @@ class Alignment:
     def getRegion(self, type):
         index = self.annotation.find(type)
         if index < 0:
-            return ""
+            return "."
         else:
             query_seq = self.query.getSequence()
             start = self.annotation.rfind("<", 0, index)
@@ -124,7 +124,7 @@ class Alignment:
                 result = result.replace("-","")
                 return result
             else:
-                return ""
+                return "."
 
     def add_v_alignment(self, reference, start):
         self.vseq = reference

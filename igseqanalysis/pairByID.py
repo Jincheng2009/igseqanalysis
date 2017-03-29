@@ -41,9 +41,10 @@ def main():
 
     if file1 is None or file2 is None:
         sys.stderr.write("missing input file \n")
-
-    df1 = pd.read_table(file1, sep="\t|,", header=None, engine='python', index_col=False)
-    df2 = pd.read_table(file2, sep="\t|,", header=None, engine='python', index_col=False)
+    
+    cols = [0,1,2,3,4,5]
+    df1 = pd.read_table(file1, sep="\t|,", header=None, names=cols, engine='python', index_col=False)
+    df2 = pd.read_table(file2, sep="\t|,", header=None, names=cols, engine='python', index_col=False)
 
     df1_vh = df1[map(lambda x : x.startswith('IGHV'),df1[1])]
     df1_vl = df1[map(lambda x : x.startswith('IGKV') or x.startswith('IGLV'),df1[1])]

@@ -58,7 +58,7 @@ def main():
         tokens = line.split(",")
         for i in idx:
             seq = tokens[i].upper()
-            prot=""
+            prot="."
             if len(seq) % 3 == 0:
                 j = 0
                 while j + 3 <= len(seq):
@@ -69,8 +69,6 @@ def main():
                     j += 3
                 if "X" in prot:
                     prot = "."
-            else:
-                prot = "."
                 
             tokens[i] = prot
         record = tokens[0]
