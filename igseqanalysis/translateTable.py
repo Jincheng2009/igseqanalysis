@@ -61,15 +61,14 @@ def main():
             prot="."
             if len(seq) % 3 == 0:
                 j = 0
+                prot = ""
                 while j + 3 <= len(seq):
                     if seq[j: j + 3] in sequtility.codontable:
                         prot = prot + sequtility.codontable[seq[j: j + 3]]
                     else:
-                        prot = prot + "X"
-                    j += 3
-                if "X" in prot:
-                    prot = "."
-                
+                        prot = "."
+                        break
+                    j += 3      
             tokens[i] = prot
         record = tokens[0]
         for i in range(1, len(tokens)):
