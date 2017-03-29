@@ -59,7 +59,7 @@ def main():
         for i in idx:
             seq = tokens[i].upper()
             prot="."
-            if len(seq) % 3 == 0:
+            if len(seq) > 0 and len(seq) % 3 == 0:
                 j = 0
                 prot = ""
                 while j + 3 <= len(seq):
