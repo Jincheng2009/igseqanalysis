@@ -47,27 +47,30 @@ def main():
     with open(fafile) as fasta_file:  # Will close handle cleanly
         identifiers = []
         lengths = []
+        counts = []
         for seq_record in SeqIO.parse(fasta_file, 'fasta'):  # (generator)
             identifiers.append(seq_record.id)
             lengths.append(''.join(seq_record.seq))
+            counts.append(int(seq_record.id.split(";size=")[-1]))
             
     #converting lists to pandas Series    
     s1 = pd.Series(identifiers, name='fastaid')
     s2 = pd.Series(lengths, name='seq')
+    s3 = pd.Series(counts, name='count')
     #Gathering Series into a pandas DataFrame and rename index as ID column
-    seq_df = pd.DataFrame(dict(fastaid=s1, seq=s2))
+    seq_df = pd.DataFrame(dict(fastaid=s1, seq=s2, count=s3))
 
     # Read in clustering result
     cluster = pd.read_table(ucfile, sep="\t", header=None, index_col=False)
     cluster = cluster[cluster[0].isin(['S','H'])]
 
     df = pd.merge(cluster, seq_df, left_on = 8, right_on = 'fastaid')
-    df = pd.merge(df, seq_df, left_on = 9, right_on = 'fastaid', how='left')
+    df = pd.merge(df, seq_df[['fastaid','seq']], left_on = 9, right_on = 'fastaid', how='left')
 
     df.loc[pd.isnull(df['seq_y']), 'seq_y'] = df['seq_x']
 
-    df = df[['seq_x', 'seq_y']]
-    df = df.groupby(['seq_x','seq_y']).size()
+    df = df[['seq_x', 'seq_y','count']]
+    df = df.groupby(['seq_x','seq_y'])['count'].sum()
     df = df.reset_index()
     df.columns = ['CDR3','CDR3c','count']
 

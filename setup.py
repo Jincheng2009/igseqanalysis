@@ -12,7 +12,7 @@ setup(
                             'countunique =  igseqanalysis.countUnique:main'
                             ]
         },
-    version = "0.1.0",
+    version = "0.1.1",
     description = "Python command line application to process IgBlast alignments",
     author = "Jincheng Wu",
     author_email = "wuji@medimmune.com",
