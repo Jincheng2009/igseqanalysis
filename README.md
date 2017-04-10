@@ -93,17 +93,17 @@ If you want to count the unique CDR3 in DNA sequences, you could provide the DNA
 
 ### 5. Convert CDR3 in CSV format to fasta format for usearch clustering
 
-If you want to cluster the unique CDR3 in DNA sequences, you could provide the DNA sequences as the input `sample.paired.tsv` 
+If you want to cluster the unique CDR3 in DNA sequences, you could provide the DNA sequences as the input `sample.paired.tsv`. The `-s` option will write size information for each unique fasta, which is required fo usearch clustering. 
 
-	cat sample/sample.paired.prot.tsv | csv2fasta -p 5  > sample/sample.VH.fasta
-	cat sample/sample.paired.prot.tsv | csv2fasta -p 10 > sample/sample.VL.fasta
+	cat sample/sample.paired.prot.tsv | csv2fasta -p 5 -s > sample/sample.VH.fasta
+	cat sample/sample.paired.prot.tsv | csv2fasta -p 10 -s > sample/sample.VL.fasta
 
 ### 6. Clustering CDR3 by usearch
 
-Clustering could efficiently reduce the effect of PCR and sequencing errors, but at expense of cluster a real unique VH/VL into another VH/VL. `-id 0.88` for protein sequences allows 1 amino acid difference when CDR length is between 9 and 16, and 2 amino acid difference when CDR length is between 17 and 24. If clustering DNA sequences, `-id 0.96` is similar to `-id 0.88` for protein sequences. `-sort size` will enable the most abundant sequence is considered as the centroid sequence of the cluster. `-fulldp -maxgaps 0` disallow any gaps.
+Clustering could efficiently reduce the effect of PCR and sequencing errors, but at expense of cluster a real unique VH/VL into another VH/VL. `-id 0.88` for protein sequences allows 1 amino acid difference when CDR length is between 9 and 16, and 2 amino acid difference when CDR length is between 17 and 24. If clustering DNA sequences, `-id 0.96` is similar to `-id 0.88` for protein sequences. `-sort size` will enable the most abundant sequence is considered as the centroid sequence of the cluster. `-fulldp -maxgaps 0 -leftjust -rightjust` disallow any gaps.
 
-	usearch -cluster_fast sample/sample.VH.fasta -id 0.88 -sort size -uc sample/sample.VH.uc -fulldp -maxgaps 0
-	usearch -cluster_fast sample/sample.VL.fasta -id 0.88 -sort size -uc sample/sample.VL.uc -fulldp -maxgaps 0
+	usearch -cluster_fast sample/sample.VH.fasta -id 0.88 -sizein -sort size -uc sample/sample.VH.uc -fulldp -maxgaps 0 -leftjust -rightjust
+	usearch -cluster_fast sample/sample.VL.fasta -id 0.88 -sizein -sort size -uc sample/sample.VL.uc -fulldp -maxgaps 0 -leftjust -rightjust
 
 ### 7. Format the usearch result into tabular format
 
