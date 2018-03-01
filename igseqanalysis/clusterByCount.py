@@ -101,7 +101,7 @@ def main():
     
     while i < total:
         if float(i) / total > nextp:
-            print("Complete " + str(float(i) / total * 100) + "%")
+            sys.stderr.write("Complete " + str(float(i) / total * 100) + "%\n")
             nextp += 0.1
         seq = seq_list[i]
         count = seq_count[i]
