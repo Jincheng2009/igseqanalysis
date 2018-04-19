@@ -37,6 +37,7 @@ def usage():
     print '-f --fastq\t fastq file (optional to extract Phred score of mutation)'
     print '-t --type \t Output type (mutation or CDR), output file is CSV format'
     print '-c --coverage\t Outpufile (optional for coverage for each alignment)'
+    print '-q --query\t Type of query (IG or TCR)'
 
     
 def main():
@@ -46,8 +47,9 @@ def main():
     extractID=False
     readFromFile=False
     analysisType = ""
+    query="IG"
     try:
-        opts, args = getopt.getopt(argv,"hb:f:t:c:", ["blast=","fastq=","type=","coverage="])
+        opts, args = getopt.getopt(argv,"hb:f:t:c:q:", ["blast=","fastq=","type=","coverage=","query="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -73,6 +75,13 @@ def main():
                 sys.stdout.write("Only mutation and CDR analysis type are allowed \n")
                 usage()
                 sys.exit()
+        elif opt in ("-q", "--query"):
+            query=arg
+            if query != "IG" and query != "TCR":
+                sys.stdout.write("Only support query type of IG or TCR \n")
+                usage()
+                sys.exit()
+
                     
             
     count = 0
@@ -172,14 +181,22 @@ def main():
         if line.startswith("Domain classification requested"):
             extractGermline=False
     
-        if extractGermline and line.startswith("IG"):
+        if extractGermline:
             gene = line.split(' ')[0]
-            if gene.startswith("IGHV") or gene.startswith("IGLV") or gene.startswith("IGKV"):
-                vgene = gene
-            elif gene.startswith("IGHD"):
-                dgene = gene
-            elif gene.startswith("IGHJ") or gene.startswith("IGLJ") or gene.startswith("IGKJ"):
-                jgene = gene
+            if line.startswith("IG") and query == "IG":
+                if gene.startswith("IGHV") or gene.startswith("IGLV") or gene.startswith("IGKV"):
+                    vgene = gene
+                elif gene.startswith("IGHD"):
+                    dgene = gene
+                elif gene.startswith("IGHJ") or gene.startswith("IGLJ") or gene.startswith("IGKJ"):
+                    jgene = gene
+            elif line.startswith("TR") and query == "TCR":
+                if gene.startswith("TRAV") or gene.startswith("TRBV"):
+                    vgene = gene
+                elif gene.startswith("TRBD"):
+                    dgene = gene
+                elif gene.startswith("TRAJ") or gene.startswith("TRBJ"):
+                    jgene = gene
                 
         ## Extract strand information
         if extractStrand:
