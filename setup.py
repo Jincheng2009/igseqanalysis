@@ -4,15 +4,18 @@ setup(
     name = "igseqanalysis",
     packages = ['igseqanalysis'],
     entry_points = {
-        "console_scripts": ['parseigblast = igseqanalysis.parseIgBlast:main',
-                            'pairbyid = igseqanalysis.pairByID:main',
+        "console_scripts": ['igblastIG =  igseqanalysis.igblastIG:main',
+                            'parseIgBlast = igseqanalysis.parseIgBlast:main',
+                            'pairById = igseqanalysis.pairByID:main',
                             'csv2fasta = igseqanalysis.csv2fasta:main',
-                            'formatcluster = igseqanalysis.formatCluster:main',
-                            'translatetable = igseqanalysis.translateTable:main',
-                            'countunique =  igseqanalysis.countUnique:main'
+                            'formatCluster = igseqanalysis.formatCluster:main',
+                            'translateTable = igseqanalysis.translateTable:main',
+                            'countUnique =  igseqanalysis.countUnique:main'
                             ]
         },
-    version = "0.1.1",
+    package_data = {'igseqanalysis': ['imgt/optional_file/*.aux', 'imgt/ig/*', 'imgt/tcr/*']},
+    include_package_data=True,
+    version = "0.2.0",
     description = "Python command line application to process IgBlast alignments",
     author = "Jincheng Wu",
     author_email = "wuji@medimmune.com",
