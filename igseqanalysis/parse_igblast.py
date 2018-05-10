@@ -28,11 +28,11 @@ MUTATION="mutation"
 CDR="CDR"
 
 def usage():
-    print 'Parse the output from IgBlastn to extract CDRs (CDR1, CDR2, CDR3), mutations and coverage'
+    print 'Parse the output from igblastn to extract CDRs (CDR1, CDR2, CDR3), mutations and coverage'
     print 'Support standard input and file input. Optional coverage output is written in a file specified by --coverage option'
     print 'Annotation region or mutation is output into standard output'
     print 'Use --type option to choose output type'
-    print 'cat igblastn_outputfile.txt | python parseIgBlast.py -t mutation [--fastq fastq_file] [--coverage coverage_report_file] > mutation.csv'
+    print 'cat igblastn_outputfile.txt | python parse_igblast.py -t mutation [--fastq fastq_file] [--coverage coverage_report_file] > mutation.csv'
     print '-b --blast\t input file from output of ncbi-igblast (default: stdin)'
     print '-f --fastq\t fastq file (optional to extract Phred score of mutation)'
     print '-t --type \t Output type (mutation or CDR), output file is CSV format'

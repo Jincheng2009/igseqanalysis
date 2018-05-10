@@ -56,7 +56,7 @@ def main():
             print newSeq
 
 def usage():
-    print 'cat CDRL3.fasta | python formatCDR.py -p 6 -t 23 -e'
+    print 'cat CDRL3.fasta | python format_CDR.py -p 6 -t 23 -e'
     
 if __name__ == "__main__":
     main()

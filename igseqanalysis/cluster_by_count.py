@@ -149,7 +149,7 @@ def main():
     
 
 def usage():
-    print 'cat cdr.count.csv | python clusterByCount.py -c 2 > cluster.count'
+    print 'cat cdr.count.csv | python cluster_by_count.py -c 2 > cluster.count'
 
 if __name__ == "__main__":
     main()

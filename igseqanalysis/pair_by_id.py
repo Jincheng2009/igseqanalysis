@@ -59,7 +59,7 @@ def main():
     df.to_csv(outfile, sep="\t", index=False, header=False, na_rep='.')
 
 def usage():
-    print 'python pairByID.py -l vh.csv -r vl.csv> paired.tsv'    
+    print 'python pair_by_id.py -l vh.csv -r vl.csv> paired.tsv'    
 
 if __name__ == "__main__":
     main()

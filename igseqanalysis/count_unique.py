@@ -14,17 +14,20 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #==============================================================================
+"""
+Created on Thu Jan 05 14:58:59 2017
 
+@author: wuji
+"""
 import sys
 import getopt
-import sequtility
+import pandas as pd
 
 def main():
     argv = sys.argv[1:]
-    readFromFile = False
     idx = []
     try:
-        opts, args = getopt.getopt(argv,"hi:p:")
+        opts, args = getopt.getopt(argv,"hi:p:d:")
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -32,9 +35,6 @@ def main():
         if opt == "-h":
             usage()
             sys.exit()
-        elif opt == "-i":
-            readFromFile = True
-            fastafile = arg
         elif opt == "-p":
             idx_str = arg
 
@@ -44,43 +44,21 @@ def main():
         usage()
         sys.exit(2)
 
-    if readFromFile:
-        filein = open(fastafile)
-    else:
-        filein = sys.stdin
+    df = pd.read_table(sys.stdin, sep="\t", header=None, index_col=False)
+    if max(idx) > df.shape[1]:
+    	sys.stderr.write("column index out of range \n")
 
-    for line in filein:
-        line = line.rstrip()
-        # Skip empty lines
-        if not line:
-            continue
-        line = line.replace("\t",",")
-        tokens = line.split(",")
-        for i in idx:
-            seq = tokens[i].upper()
-            prot="."
-            if len(seq) > 0 and len(seq) % 3 == 0:
-                j = 0
-                prot = ""
-                while j + 3 <= len(seq):
-                    if seq[j: j + 3] in sequtility.codontable:
-                        prot = prot + sequtility.codontable[seq[j: j + 3]]
-                    else:
-                        prot = "."
-                        break
-                    j += 3      
-            tokens[i] = prot
-        record = tokens[0]
-        for i in range(1, len(tokens)):
-            record += "\t" + tokens[i]
-        sys.stdout.write(record + "\n")
+    colnames = []
+    for i in idx:
+    	colnames.append(df.columns[i])
 
+    count_df = df.groupby(colnames).size().reset_index()
+    count_df.to_csv(sys.stdout, sep="\t", index=False, header=False, na_rep='.')
+    
 def usage():
-    print 'cat dna.fasta | python translateTable.py -p 3,4,5,8,9,10 > prot.fasta'
-    print '-p \t comma-separated list of column index for translation (0-based index)'    
+    print 'cat CDR.csv | python count_unique.py -p 5,10 > out.tsv'
+    print '-p \t comma-separated list of column index for counting (0-based index)' 
 
 if __name__ == "__main__":
     main()
-    
 
-    
