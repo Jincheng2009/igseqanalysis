@@ -5,7 +5,7 @@ Igseqanalysis is a Python package for parsing and processing the NCBI-IgBlast al
 ## Prerequisite
 * Python 2.7 [Installation instruction](https://www.python.org/download/releases/2.7/)
 * pip [Installation site](https://pip.pypa.io/en/stable/installing/)
-* Standalone NCBI-IgBlast 1.5/1.6 [Installation FTP site](ftp://ftp.ncbi.nih.gov/blast/executables/igblast/release/)
+* Standalone NCBI-IgBlast 1.5 or 1.6 [Installation FTP site](ftp://ftp.ncbi.nih.gov/blast/executables/igblast/release/)
 * usearch [Installation site](http://www.drive5.com/usearch/) (Optional: needed if you want to cluster CDR sequence by identity)
 
 *Note: For convenience, add `igblastn` and `usearch` to environment PATH. The development had been done on Red Hat Linux 6.*
@@ -29,13 +29,13 @@ Adjust the path accordingly for the data files if you are using your own dataset
 #### Annotate Sequences in Read 1 (Immunoglobulin)
 
 ```
-cat sample/sample_R1.fasta | igblast_IG | parse_igblast -q TCR -t CDR > sample/sample_R1.csv
+cat sample/sample_R1.fasta | igblast_IG | parse_igblast -q IG -t CDR > sample/sample_R1.csv
 ```    
 
 #### Annotate Sequences in Read 2 (Immunoglobulin)
 
 ```  
-cat sample/sample_R2.fasta | igblast_IG | parse_igblast -q TCR -t CDR > sample/sample_R2.csv
+cat sample/sample_R2.fasta | igblast_IG | parse_igblast -q IG -t CDR > sample/sample_R2.csv
 ```
 
 #### Annotate Sequences in Read 1 (TCR)
