@@ -8,7 +8,7 @@ Igseqanalysis is a Python package for parsing and processing the NCBI-IgBlast al
 * Standalone NCBI-IgBlast 1.5 or 1.6 [Installation FTP site](ftp://ftp.ncbi.nih.gov/blast/executables/igblast/release/)
 * usearch [Installation site](http://www.drive5.com/usearch/) (Optional: needed if you want to cluster CDR sequence by identity)
 
-*Note: For convenience, add `igblastn` and `usearch` to environment PATH. The development had been done on Red Hat Linux 6.*
+*Note: Add `igblastn` and `usearch` to environment PATH. The development had been done on Red Hat Linux 6.*
 
 ## Installation
 
