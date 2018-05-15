@@ -20,7 +20,7 @@ setup(
         },
     package_data = {'igseqanalysis': ['imgt/optional_file/*.aux', 'imgt/ig/*', 'imgt/tcr/*']},
     include_package_data=True,
-    version = "0.2.0",
+    version = "0.2.1",
     description = "Python command line application to process IgBlast alignments",
     author = "Jincheng Wu",
     author_email = "wuji@medimmune.com",

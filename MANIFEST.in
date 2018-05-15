@@ -1,0 +1,5 @@
+include igseqanalysis/imgt/optional_file/*.aux
+include igseqanalysis/imgt/tcr/*
+include igseqanalysis/imgt/ig/*
+include README.md
+include COPYING
