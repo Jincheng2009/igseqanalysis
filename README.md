@@ -14,8 +14,7 @@ Igseqanalysis is a Python package for parsing and processing the NCBI-IgBlast al
 
 Change the current directory to the igseqanalysis folder and install the package using pip from the local file:
 ```
-cd /path/to/igseqanalysis/
-pip install .
+pip install igseqanalysis
 ```
 After the installation, run `parse_igblast -h` and if the tool is successfully installed, it will print the command line instruction for the tool.
 

@@ -15,12 +15,13 @@ setup(
                             'csv2fasta = igseqanalysis.csv2fasta:main',
                             'format_cluster = igseqanalysis.format_cluster:main',
                             'translate_table = igseqanalysis.translate_table:main',
-                            'count_unique =  igseqanalysis.count_unique:main'
+                            'count_unique =  igseqanalysis.count_unique:main',
+                            'cluster_by_count =  igseqanalysis.cluster_by_count:main'
                             ]
         },
     package_data = {'igseqanalysis': ['imgt/optional_file/*.aux', 'imgt/ig/*', 'imgt/tcr/*']},
     include_package_data=True,
-    version = "0.2.1",
+    version = "0.2.2",
     description = "Python command line application to process IgBlast alignments",
     author = "Jincheng Wu",
     author_email = "wuji@medimmune.com",
